@@ -1,0 +1,30 @@
+<mujoco model="ailamp_scene">
+    <include file="robot.xml" />
+    <option timestep="0.01"/>
+
+    <visual>
+        <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0" />
+        <rgba haze="0.15 0.25 0.35 1" />
+        <global azimuth="160" elevation="-20" />
+    </visual>
+
+    <asset>
+        <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="3072" />
+        <texture type="2d" name="groundplane" builtin="checker" mark="edge" rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3" markrgb="0.8 0.8 0.8" width="300" height="300" />
+        <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0.2" />
+        <material name="target_red" rgba="1 0.12 0.08 1" />
+    </asset>
+
+    <worldbody>
+        <light pos="0 0 3.5" dir="0 0 -1" directional="true" />
+        <geom name="floor" size="0 0 0.05" pos="0 0 0" type="plane" material="groundplane" />
+        <body name="virtual_person_target" pos="0.0 -1.5 0.9">
+            <joint name="target_slide_x" type="slide" axis="1 0 0" range="-1.2 1.2" />
+            <joint name="target_slide_y" type="slide" axis="0 1 0" range="-3.5 -0.35" />
+            <geom name="virtual_person_body" type="capsule" fromto="0 0 -0.55 0 0 0.55" size="0.18" material="target_red" contype="0" conaffinity="0" />
+            <geom name="virtual_person_head" type="sphere" pos="0 0 0.78" size="0.16" material="target_red" contype="0" conaffinity="0" />
+        </body>
+        <camera name="ailamp_sim_camera" pos="0 -1.2 1.2" xyaxes="1 0 0 0 0.5 1" fovy="55" />
+    </worldbody>
+</mujoco>
+

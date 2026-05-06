@@ -1,0 +1,59 @@
+[system]
+project_name = "AILamp"
+platform = "jetson"
+
+[controller]
+model = "NVIDIA Jetson Orin Nano Super Developer Kit"
+mpn = "945-13766-0000-000"
+storage = "Samsung 980 NVMe M.2 2280 500GB, MZ-V8V500B"
+system_card = "SanDisk Ultra microSDXC 64GB UHS-I"
+
+[motors]
+port = "/dev/ttyACM0"
+driver_model = "Waveshare Servo Driver with ESP32, SKU 21593"
+servo_model = "Waveshare ST3215 Servo, 30kg.cm @ 12V, SKU 22414"
+servo_quantity = 5
+fps = 30
+ids = { base_yaw = 1, base_pitch = 2, elbow_pitch = 3, wrist_roll = 4, wrist_pitch = 5 }
+
+[led]
+port = "/dev/ttyACM1"
+controller = "Raspberry Pi Pico WH"
+panel = "Adafruit NeoPixel NeoMatrix 8x8, 64 RGB LED, Product ID 1487"
+count = 64
+baudrate = 115200
+brightness = 128
+power_supply = "MEAN WELL GST60A05-P1J, 5V 6A 30W"
+
+[camera]
+model = "Arducam UB0234, 2MP OV2710 USB2.0 UVC Camera, 1080p, M12 lens"
+device = 0
+device_path = "/dev/video0"
+width = 640
+height = 480
+fps = 30
+pixel_format = "MJPG"
+
+[vision]
+model = "yolov8n.pt"
+confidence = 0.45
+left_threshold = -0.20
+right_threshold = 0.20
+close_area_ratio = 0.35
+far_depth_m = 3.0
+
+[audio]
+input_model = "Seeed Studio ReSpeaker XVF3800 USB 4-Mic Array with Case, Product 6490"
+speaker_model = "Seeed Studio Mono Enclosed Speaker, 4 ohm 5W"
+input_device = "auto"
+output_device = "auto"
+
+[voice]
+provider = "openai"
+transport = "livekit"
+enabled = true
+
+[simulation]
+model_path = "simulation/ailamp_scene.xml"
+recordings_dir = "ailamp_runtime/ailamp/recordings"
+lock_freejoint = true

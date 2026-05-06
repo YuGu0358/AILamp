@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ailamp"
+version = "0.1.0"
+description = "AILamp Jetson runtime, MuJoCo simulation, and hardware integration"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "GPL-3.0-only" }
+dependencies = [
+    "numpy>=1.26",
+]
+
+[project.optional-dependencies]
+hardware = [
+    "opencv-python>=4.9",
+    "pyserial>=3.5",
+    "sounddevice>=0.5",
+    "ultralytics>=8.0",
+]
+simulation = [
+    "mujoco>=3.2",
+    "glfw>=2.7",
+    "pillow>=10.0",
+]
+voice = [
+    "python-dotenv>=1.0",
+    "livekit-agents[openai]>=1.2",
+    "livekit-plugins-noise-cancellation>=0.2",
+]
+test = [
+    "pytest>=8.0",
+]
+
+[project.scripts]
+ailamp = "ailamp.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "ailamp_runtime"}
+
+[tool.setuptools.packages.find]
+where = ["ailamp_runtime"]
+
+[tool.pytest.ini_options]
+pythonpath = ["ailamp_runtime"]
+testpaths = ["tests"]
