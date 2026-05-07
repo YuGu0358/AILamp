@@ -18,13 +18,12 @@
     <worldbody>
         <light pos="0 0 3.5" dir="0 0 -1" directional="true" />
         <geom name="floor" size="0 0 0.05" pos="0 0 0" type="plane" material="groundplane" />
-        <body name="virtual_person_target" pos="0.0 -1.5 0.9">
+        <body name="virtual_person_target" pos="0.0 0.0 0.9">
             <joint name="target_slide_x" type="slide" axis="1 0 0" range="-1.2 1.2" />
-            <joint name="target_slide_y" type="slide" axis="0 1 0" range="-3.5 -0.35" />
+            <joint name="target_slide_y" type="slide" axis="0 1 0" range="-3.8 -0.35" />
             <geom name="virtual_person_body" type="capsule" fromto="0 0 -0.55 0 0 0.55" size="0.18" material="target_red" contype="0" conaffinity="0" />
             <geom name="virtual_person_head" type="sphere" pos="0 0 0.78" size="0.16" material="target_red" contype="0" conaffinity="0" />
         </body>
-        <camera name="ailamp_sim_camera" pos="0 -1.2 1.2" xyaxes="1 0 0 0 0.5 1" fovy="55" />
+        <camera name="ailamp_sim_camera" pos="0 -4.0 1.2" xyaxes="1 0 0 0 0.119 0.993" fovy="55" />
     </worldbody>
 </mujoco>
-

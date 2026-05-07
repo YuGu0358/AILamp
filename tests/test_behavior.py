@@ -1,5 +1,6 @@
 from ailamp.models import VisionEvent, VisionEventType
 from ailamp.services.behavior import BehaviorService
+from ailamp.services.motor import RecordingStore
 
 
 def test_behavior_maps_vision_events_to_motion_and_led():
@@ -13,7 +14,18 @@ def test_behavior_maps_vision_events_to_motion_and_led():
     assert action.motion == "nod"
     assert action.rgb == (255, 180, 80)
 
+    action = service.decide(VisionEvent(VisionEventType.PERSON_LEFT, confidence=0.9))
+    assert action.motion == "headshake"
+
     action = service.decide(VisionEvent(VisionEventType.PERSON_CLOSE, confidence=0.9))
     assert action.motion == "shy"
     assert action.rgb == (255, 80, 120)
 
+
+def test_behavior_motions_exist_in_recordings():
+    recordings = RecordingStore("ailamp_runtime/ailamp/recordings").list_names()
+    service = BehaviorService()
+
+    motions = {service.decide(VisionEvent(event_type)).motion for event_type in VisionEventType}
+
+    assert motions.issubset(set(recordings))

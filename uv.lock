@@ -35,6 +35,7 @@ hardware = [
 simulation = [
     { name = "glfw" },
     { name = "mujoco" },
+    { name = "pillow" },
 ]
 test = [
     { name = "pytest" },
@@ -53,6 +54,7 @@ requires-dist = [
     { name = "mujoco", marker = "extra == 'simulation'", specifier = ">=3.2" },
     { name = "numpy", specifier = ">=1.26" },
     { name = "opencv-python", marker = "extra == 'hardware'", specifier = ">=4.9" },
+    { name = "pillow", marker = "extra == 'simulation'", specifier = ">=10.0" },
     { name = "pyserial", marker = "extra == 'hardware'", specifier = ">=3.5" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=8.0" },
     { name = "python-dotenv", marker = "extra == 'voice'", specifier = ">=1.0" },

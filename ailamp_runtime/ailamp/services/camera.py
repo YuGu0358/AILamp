@@ -14,11 +14,19 @@ class CameraFrameInfo:
 
 
 class CameraService:
-    def __init__(self, device: int = 0, width: int = 640, height: int = 480, fps: int = 30):
+    def __init__(
+        self,
+        device: int | str = 0,
+        width: int = 640,
+        height: int = 480,
+        fps: int = 30,
+        pixel_format: str = "MJPG",
+    ):
         self.device = device
         self.width = width
         self.height = height
         self.fps = fps
+        self.pixel_format = pixel_format
         self._capture: Any = None
 
     def open(self) -> None:
@@ -28,7 +36,7 @@ class CameraService:
         self._capture.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
         self._capture.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
         self._capture.set(cv2.CAP_PROP_FPS, self.fps)
-        self._capture.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
+        self._capture.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*self.pixel_format))
 
     def read(self):
         if self._capture is None:
@@ -52,4 +60,3 @@ class CameraService:
         if self._capture is not None:
             self._capture.release()
             self._capture = None
-

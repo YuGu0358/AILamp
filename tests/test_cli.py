@@ -16,5 +16,5 @@ def test_cli_sim_demo_outputs_virtual_vision_events(capsys):
 
     assert exit_code == 0
     assert "event=no_person motion=scanning" in output
-    assert "event=person_left motion=look_left" in output
+    assert "event=person_left motion=headshake" in output
     assert "event=person_close motion=shy" in output

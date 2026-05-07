@@ -20,4 +20,14 @@ def test_loads_exact_hardware_bom_and_ports():
         "wrist_pitch": 5,
     }
     assert config.led.count == 64
+    assert config.power.servo_supply == "MEAN WELL GST120A12-P1J, 12V 10A 120W"
+    assert config.led.logic_level_shifter == "TXS0108E 8-Channel Logic Level Converter Module"
+    assert config.hardware_bom["power_connector"].quantity == "10"
+    assert config.hardware_bom["camera"].part.startswith("Arducam UB0234")
 
+
+def test_loads_camera_path_and_pixel_format():
+    config = load_hardware_config(Path("config/hardware.toml"))
+
+    assert config.camera.device_path == "/dev/video0"
+    assert config.camera.pixel_format == "MJPG"

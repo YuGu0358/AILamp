@@ -16,20 +16,7 @@ Do not make Blender, Gazebo, Isaac Sim, SolidWorks, or Fusion 360 the primary pr
 
 ## Fixed Hardware BOM
 
-The non-printed hardware must match `docs/en/0-prerequisites.md` and `config/hardware.toml`.
-
-- NVIDIA Jetson Orin Nano Super Developer Kit, MPN `945-13766-0000-000`
-- Samsung 980 NVMe M.2 2280 500GB, `MZ-V8V500B`
-- SanDisk Ultra microSDXC 64GB UHS-I
-- 5x Waveshare ST3215 Servo, SKU `22414`
-- Waveshare Servo Driver with ESP32, SKU `21593`
-- MEAN WELL `GST120A12-P1J`, 12V 10A 120W
-- Raspberry Pi Pico WH
-- Adafruit NeoPixel NeoMatrix 8x8, Product ID `1487`
-- MEAN WELL `GST60A05-P1J`, 5V 6A 30W
-- Arducam `UB0234` USB UVC camera
-- Seeed Studio ReSpeaker XVF3800 USB 4-Mic Array with Case, Product `6490`
-- Seeed Studio Mono Enclosed Speaker, 4 ohm 5W
+The full non-printed hardware BOM is the structured `[hardware_bom]` section in `config/hardware.toml`; `docs/en/0-prerequisites.md` mirrors it for purchasing. This includes Jetson, storage, ST3215 servos, Waveshare servo driver, both MEAN WELL power supplies, Pico WH, NeoMatrix, TXS0108E, Arducam UB0234, ReSpeaker XVF3800, Seeed 4 ohm 5W speaker, emergency switch, USB cables, servo extensions, DC barrel adapters, WAGO connectors, and wire.
 
 ## Project Layout
 
@@ -48,7 +35,8 @@ AILamp/
 ## Setup
 
 ```bash
-cd "/Users/yugu/Documents/New project 4/AILamp"
+git clone https://github.com/YuGu0358/AILamp.git
+cd AILamp
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[test]"
@@ -58,6 +46,15 @@ For Jetson hardware:
 
 ```bash
 pip install -e ".[hardware,voice]"
+```
+
+For physical ST3215 playback and calibration, install the upstream LeLamp runtime beside AILamp:
+
+```bash
+cd ..
+git clone https://github.com/humancomputerlab/lelamp_runtime.git
+cd AILamp
+python3 -m pip install -e ../lelamp_runtime
 ```
 
 For MuJoCo simulation:
@@ -85,3 +82,7 @@ ailamp agent
 
 - English guide: `docs/en/`
 - Chinese guide: `docs/zh/`
+
+## Attribution
+
+AILamp copies 3D print files, MuJoCo/URDF simulation assets, and motion recording CSV files from Human Computer Lab's LeLamp projects. See `NOTICE.md` and `LICENSE`.

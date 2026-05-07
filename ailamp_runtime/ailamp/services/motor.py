@@ -35,7 +35,14 @@ class MotorService:
         self._animation_service: Optional[object] = None
 
     def connect(self) -> None:
-        from lelamp.service.motors.animation_service import AnimationService  # type: ignore
+        try:
+            from lelamp.service.motors.animation_service import AnimationService  # type: ignore
+        except ModuleNotFoundError as exc:
+            raise RuntimeError(
+                "Physical ST3215 playback needs the upstream LeLamp runtime. "
+                "Clone https://github.com/humancomputerlab/lelamp_runtime next to AILamp "
+                "and install it with `python3 -m pip install -e ../lelamp_runtime` on the Jetson."
+            ) from exc
 
         self._animation_service = AnimationService(port=self.port, lamp_id=self.lamp_id)
         self._animation_service.start()
@@ -49,4 +56,3 @@ class MotorService:
         if self._animation_service is None:
             raise RuntimeError("MotorService is not connected")
         self._animation_service.dispatch("play", recording_name)
-

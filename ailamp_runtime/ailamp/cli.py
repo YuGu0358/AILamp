@@ -12,7 +12,7 @@ from ailamp.services.led_serial import LEDSerialService
 from ailamp.services.motor import RecordingStore
 from ailamp.services.vision import classify_person_position
 from ailamp.simulation.mujoco_runner import MujocoRunner
-from ailamp.simulation.sim_vision import classify_virtual_target
+from ailamp.simulation.sim_vision import classify_virtual_target_from_joints
 
 
 DEFAULT_CONFIG = "config/hardware.toml"
@@ -57,22 +57,23 @@ def motor_test(args) -> int:
 def sim_demo(args) -> int:
     config = _config(args)
     behavior = BehaviorService()
-    positions = [
+    target_joint_sets = [
         None,
-        (-0.6, 0.0, 1.5),
-        (0.0, 0.0, 1.5),
-        (0.6, 0.0, 1.5),
-        (0.0, 0.0, 0.45),
-        (0.0, 0.0, 3.8),
+        {"target_slide_x": -0.6, "target_slide_y": -1.5},
+        {"target_slide_x": 0.0, "target_slide_y": -1.5},
+        {"target_slide_x": 0.6, "target_slide_y": -1.5},
+        {"target_slide_x": 0.0, "target_slide_y": -0.45},
+        {"target_slide_x": 0.0, "target_slide_y": -3.8},
     ]
-    for position in positions:
-        event = classify_virtual_target(position)
+    for joints in target_joint_sets:
+        event = classify_virtual_target_from_joints(joints)
         action = behavior.decide(event)
-        print(f"target={position} event={event.event_type.value} motion={action.motion} rgb={action.rgb}")
+        print(f"target_joints={joints} event={event.event_type.value} motion={action.motion} rgb={action.rgb}")
 
     if args.render:
         runner = MujocoRunner(config.simulation.model_path, lock_freejoint=config.simulation.lock_freejoint)
         runner.load()
+        runner.set_target_position(0.0, 1.5)
         runner.replay_recording("wake_up", config.simulation.recordings_dir, max_frames=30)
         output = runner.render("outputs/sim_demo.png")
         print("render:", output)
@@ -97,7 +98,13 @@ def camera_test(args) -> int:
     config = _config(args)
     from ailamp.services.camera import CameraService
 
-    camera = CameraService(config.camera.device, config.camera.width, config.camera.height, config.camera.fps)
+    camera = CameraService(
+        config.camera.device_path,
+        config.camera.width,
+        config.camera.height,
+        config.camera.fps,
+        config.camera.pixel_format,
+    )
     try:
         report = camera.probe()
         print(report)
@@ -123,7 +130,13 @@ def vision_demo(args) -> int:
     from ailamp.services.camera import CameraService
     from ailamp.services.vision import DetectorService
 
-    camera = CameraService(config.camera.device, config.camera.width, config.camera.height, config.camera.fps)
+    camera = CameraService(
+        config.camera.device_path,
+        config.camera.width,
+        config.camera.height,
+        config.camera.fps,
+        config.camera.pixel_format,
+    )
     detector = DetectorService(config.vision.model, config.vision.confidence)
     detector.load()
     try:
@@ -133,7 +146,13 @@ def vision_demo(args) -> int:
             print("event=no_person confidence=0.00")
             return 1
         bbox = detector.detect_person(frame)
-        event = classify_person_position(bbox, (config.camera.width, config.camera.height))
+        event = classify_person_position(
+            bbox,
+            (config.camera.width, config.camera.height),
+            left_threshold=config.vision.left_threshold,
+            right_threshold=config.vision.right_threshold,
+            close_area_ratio=config.vision.close_area_ratio,
+        )
         action = BehaviorService().decide(event)
         print(f"event={event.event_type.value} confidence={event.confidence:.2f} motion={action.motion} rgb={action.rgb}")
     finally:
@@ -186,4 +205,3 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv[1:]))
-

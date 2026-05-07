@@ -21,3 +21,13 @@ def test_classifies_virtual_target_events():
     assert classify_virtual_target((0.0, 0.0, 0.45)).event_type == VisionEventType.PERSON_CLOSE
     assert classify_virtual_target((0.0, 0.0, 3.8)).event_type == VisionEventType.PERSON_FAR
 
+
+def test_classifies_camera_person_position_with_custom_thresholds():
+    event = classify_person_position(
+        BoundingBox(210, 120, 100, 100, 0.8, "person"),
+        (640, 480),
+        left_threshold=-0.50,
+        right_threshold=0.50,
+    )
+
+    assert event.event_type == VisionEventType.PERSON_CENTER

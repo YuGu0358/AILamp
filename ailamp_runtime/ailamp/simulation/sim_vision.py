@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import Optional
 
 from ailamp.models import VisionEvent, VisionEventType
@@ -27,3 +28,16 @@ def classify_virtual_target(
         return VisionEvent(VisionEventType.PERSON_RIGHT, confidence=1.0, normalized_offset=x)
     return VisionEvent(VisionEventType.PERSON_CENTER, confidence=1.0, normalized_offset=x)
 
+
+def classify_virtual_target_from_joints(
+    joints: Mapping[str, float] | None,
+    *,
+    x_joint: str = "target_slide_x",
+    y_joint: str = "target_slide_y",
+) -> VisionEvent:
+    if joints is None:
+        return classify_virtual_target(None)
+
+    x = joints[x_joint]
+    depth = abs(joints[y_joint])
+    return classify_virtual_target((x, 0.0, depth))

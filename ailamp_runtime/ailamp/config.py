@@ -5,6 +5,8 @@ from pathlib import Path
 from typing import Any
 import tomllib
 
+from ailamp.paths import project_root
+
 
 @dataclass(frozen=True)
 class SystemConfig:
@@ -39,6 +41,25 @@ class LEDConfig:
     baudrate: int
     brightness: int
     power_supply: str
+    logic_level_shifter: str
+
+
+@dataclass(frozen=True)
+class PowerConfig:
+    servo_supply: str
+    led_supply: str
+    emergency_switch: str
+    barrel_adapter: str
+    power_connector: str
+    power_wire_red: str
+    power_wire_black: str
+    signal_wire: str
+
+
+@dataclass(frozen=True)
+class BOMItem:
+    part: str
+    quantity: str
 
 
 @dataclass(frozen=True)
@@ -88,6 +109,7 @@ class SimulationConfig:
 class HardwareConfig:
     system: SystemConfig
     controller: ControllerConfig
+    power: PowerConfig
     motors: MotorConfig
     led: LEDConfig
     camera: CameraConfig
@@ -95,13 +117,14 @@ class HardwareConfig:
     audio: AudioConfig
     voice: VoiceConfig
     simulation: SimulationConfig
+    hardware_bom: dict[str, BOMItem]
 
 
 def _resolve_config_path(path: str | Path) -> Path:
     candidate = Path(path)
     if candidate.is_absolute():
         return candidate
-    return Path(__file__).resolve().parents[2] / candidate
+    return project_root() / candidate
 
 
 def load_hardware_config(path: str | Path) -> HardwareConfig:
@@ -112,6 +135,7 @@ def load_hardware_config(path: str | Path) -> HardwareConfig:
     return HardwareConfig(
         system=SystemConfig(**raw["system"]),
         controller=ControllerConfig(**raw["controller"]),
+        power=PowerConfig(**raw["power"]),
         motors=MotorConfig(**raw["motors"]),
         led=LEDConfig(**raw["led"]),
         camera=CameraConfig(**raw["camera"]),
@@ -119,5 +143,5 @@ def load_hardware_config(path: str | Path) -> HardwareConfig:
         audio=AudioConfig(**raw["audio"]),
         voice=VoiceConfig(**raw["voice"]),
         simulation=SimulationConfig(**raw["simulation"]),
+        hardware_bom={key: BOMItem(**value) for key, value in raw["hardware_bom"].items()},
     )
-

@@ -22,9 +22,9 @@ AILamp keeps the upstream LeLamp simulation workflow:
 
 ```text
 no_person -> scanning -> RGB(30, 30, 80)
-person_left -> look_left -> RGB(80, 120, 255)
+person_left -> headshake -> RGB(80, 120, 255)
 person_center -> nod -> RGB(255, 180, 80)
-person_right -> look_right -> RGB(80, 120, 255)
+person_right -> scanning -> RGB(80, 120, 255)
 person_close -> shy -> RGB(255, 80, 120)
 person_far -> curious -> RGB(80, 255, 160)
 ```
