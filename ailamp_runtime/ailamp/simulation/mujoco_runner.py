@@ -169,7 +169,10 @@ class MujocoRunner:
         self.model.vis.global_.offheight = max(self.model.vis.global_.offheight, height)
         renderer = mujoco.Renderer(self.model, width=width, height=height)
         camera = camera_name if self._camera_exists(camera_name) else None
-        renderer.update_scene(self.data, camera=camera)
+        if camera is None:
+            renderer.update_scene(self.data)
+        else:
+            renderer.update_scene(self.data, camera=camera)
         image = renderer.render()
 
         from PIL import Image  # type: ignore
