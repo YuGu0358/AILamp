@@ -64,6 +64,16 @@ provider = "openai"
 transport = "livekit"
 enabled = true
 
+[birthday]
+enabled = true
+month = 5
+day = 8
+message = "Happy birthday, Yugu!"
+motion = "happy_wiggle"
+rgb = [255, 180, 80]
+state_file = "outputs/birthday_state.json"
+speech_command = "auto"
+
 [simulation]
 model_path = "simulation/ailamp_scene.xml"
 recordings_dir = "ailamp_runtime/ailamp/recordings"

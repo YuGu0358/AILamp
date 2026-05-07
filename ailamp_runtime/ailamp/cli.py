@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from datetime import date
 from pathlib import Path
 import sys
 
@@ -8,7 +9,9 @@ from ailamp.config import load_hardware_config
 from ailamp.hardware_check import run_device_presence_checks, run_static_hardware_checks
 from ailamp.paths import resolve_project_path
 from ailamp.services.behavior import BehaviorService
+from ailamp.services.birthday import BirthdayService
 from ailamp.services.led_serial import LEDSerialService
+from ailamp.services.motor import MotorService
 from ailamp.services.motor import RecordingStore
 from ailamp.services.vision import classify_person_position
 from ailamp.simulation.mujoco_runner import MujocoRunner
@@ -127,6 +130,48 @@ def audio_test(args) -> int:
     return 0
 
 
+def birthday_check(args) -> int:
+    config = _config(args)
+    today = date.fromisoformat(args.today) if args.today else None
+    service = BirthdayService(config.birthday)
+    status = service.status(today, force=args.force)
+    print(
+        "birthday="
+        f"enabled={status.enabled} date={status.today.isoformat()} "
+        f"is_birthday={status.is_birthday} already_played={status.already_played} "
+        f"should_play={status.should_play} message={status.message}"
+    )
+    if not status.should_play:
+        return 0
+
+    if args.with_outputs:
+        led = LEDSerialService(config.led.port, led_count=config.led.count, baudrate=config.led.baudrate)
+        motors = MotorService(
+            config.motors.port,
+            config.system.project_name.lower(),
+            resolve_project_path(config.simulation.recordings_dir),
+        )
+        led.connect()
+        try:
+            led.solid(*status.rgb)
+            motors.connect()
+            try:
+                motors.play(status.motion)
+            finally:
+                motors.close()
+        finally:
+            led.close()
+        print(f"outputs=played motion={status.motion} rgb={status.rgb}")
+
+    if args.speak:
+        print(service.speak(status.message))
+
+    if not args.dry_run:
+        service.mark_played(status.today)
+        print(f"marked_played={status.today.isoformat()}")
+    return 0
+
+
 def vision_demo(args) -> int:
     config = _config(args)
     from ailamp.services.camera import CameraService
@@ -188,6 +233,14 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers.add_parser("audio-test").set_defaults(func=audio_test)
     subparsers.add_parser("vision-demo").set_defaults(func=vision_demo)
     subparsers.add_parser("agent").set_defaults(func=agent)
+
+    birthday = subparsers.add_parser("birthday-check")
+    birthday.add_argument("--today", default=None, help="Override date as YYYY-MM-DD for testing")
+    birthday.add_argument("--force", action="store_true", help="Ignore date and already-played checks")
+    birthday.add_argument("--dry-run", action="store_true", help="Do not write birthday state")
+    birthday.add_argument("--speak", action="store_true", help="Use local speech command when available")
+    birthday.add_argument("--with-outputs", action="store_true", help="Play configured lamp motion and LED color")
+    birthday.set_defaults(func=birthday_check)
 
     sim_demo_parser = subparsers.add_parser("sim-demo")
     sim_demo_parser.add_argument("--render", action="store_true")

@@ -24,6 +24,11 @@ def test_loads_exact_hardware_bom_and_ports():
     assert config.led.logic_level_shifter == "TXS0108E 8-Channel Logic Level Converter Module"
     assert config.hardware_bom["power_connector"].quantity == "10"
     assert config.hardware_bom["camera"].part.startswith("Arducam UB0234")
+    assert config.birthday.month == 5
+    assert config.birthday.day == 8
+    assert config.birthday.message == "Happy birthday, Yugu!"
+    assert config.birthday.motion == "happy_wiggle"
+    assert config.birthday.rgb == (255, 180, 80)
 
 
 def test_loads_camera_path_and_pixel_format():

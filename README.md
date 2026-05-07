@@ -73,6 +73,7 @@ ailamp motor-test
 ailamp led-test
 ailamp camera-test
 ailamp audio-test
+ailamp birthday-check --today 2026-05-08 --dry-run
 ailamp sim-demo
 ailamp sim-viewer --render outputs/model.png
 ailamp vision-demo

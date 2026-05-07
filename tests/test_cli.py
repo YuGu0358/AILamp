@@ -20,6 +20,16 @@ def test_cli_hardware_check_failures_only_is_empty(capsys):
     assert output == ""
 
 
+def test_cli_birthday_check_dry_run(capsys):
+    exit_code = main(["birthday-check", "--today", "2026-05-08", "--dry-run"])
+    output = capsys.readouterr().out
+
+    assert exit_code == 0
+    assert "is_birthday=True" in output
+    assert "should_play=True" in output
+    assert "Happy birthday, Yugu!" in output
+
+
 def test_cli_sim_demo_outputs_virtual_vision_events(capsys):
     exit_code = main(["sim-demo"])
     output = capsys.readouterr().out
