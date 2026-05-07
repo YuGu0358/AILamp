@@ -2,6 +2,18 @@
 
 AILamp is a Jetson-based interactive robotic lamp built from the LeLamp mechanical and motion foundation. It integrates MuJoCo simulation, virtual vision, local person detection, ST3215 servo control, Pico WH LED control, USB audio, and OpenAI/LiveKit voice interaction.
 
+## Modeling and Simulation Toolchain
+
+AILamp keeps the same toolchain as the upstream LeLamp repository:
+
+- Mechanical CAD: OnShape.
+- 3D print exchange files: `.3mf` files in `3D/`.
+- Mesh assets for simulation: `.stl` files in `simulation/assets/`.
+- Robot simulation: MuJoCo MJCF XML, with `simulation/ailamp_scene.xml` as the AILamp scene.
+- Reference robot description: `simulation/robot.urdf` is kept with the upstream assets.
+
+Do not make Blender, Gazebo, Isaac Sim, SolidWorks, or Fusion 360 the primary project workflow unless the team explicitly changes this toolchain.
+
 ## Fixed Hardware BOM
 
 The non-printed hardware must match `docs/en/0-prerequisites.md` and `config/hardware.toml`.
@@ -24,7 +36,7 @@ The non-printed hardware must match `docs/en/0-prerequisites.md` and `config/har
 ```text
 AILamp/
   3D/                         LeLamp .3mf print files
-  simulation/                 MuJoCo model, STL assets, AILamp scene
+  simulation/                 MuJoCo MJCF model, STL assets, AILamp scene
   firmware/pico_led_controller/
   ailamp_runtime/ailamp/      Python runtime package
   config/hardware.toml        Fixed hardware and runtime config
@@ -73,4 +85,3 @@ ailamp agent
 
 - English guide: `docs/en/`
 - Chinese guide: `docs/zh/`
-

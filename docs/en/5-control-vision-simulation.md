@@ -7,7 +7,16 @@ ailamp sim-demo
 ailamp sim-viewer --render outputs/ailamp.png
 ```
 
-The simulation scene is `simulation/ailamp_scene.xml`. It includes the LeLamp robot, a virtual person target, and a simulation camera.
+AILamp keeps the upstream LeLamp simulation workflow:
+
+- Simulation engine: MuJoCo.
+- Main scene: `simulation/ailamp_scene.xml`.
+- Upstream scene kept for reference: `simulation/scene.xml`.
+- Robot MJCF: `simulation/robot.xml`.
+- Reference URDF: `simulation/robot.urdf`.
+- Mesh assets: `simulation/assets/*.stl`.
+
+`simulation/ailamp_scene.xml` includes the LeLamp robot, a virtual person target, and a simulation camera.
 
 ## Vision Events
 
@@ -29,4 +38,3 @@ ailamp led-test
 ailamp vision-demo
 ailamp agent
 ```
-
