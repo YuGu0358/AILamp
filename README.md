@@ -68,6 +68,7 @@ pip install -e ".[simulation]"
 ```bash
 ailamp hardware-check
 ailamp hardware-check --include-devices
+ailamp hardware-check --failures-only
 ailamp motor-test
 ailamp led-test
 ailamp camera-test
@@ -77,6 +78,18 @@ ailamp sim-viewer --render outputs/model.png
 ailamp vision-demo
 ailamp agent
 ```
+
+## Verification
+
+Run the local project check before pushing changes:
+
+```bash
+scripts/verify_local.sh
+```
+
+The script runs unit tests, lockfile validation, static hardware checks, wheel build, whitespace checks, and MuJoCo smoke tests when the sibling `mujoco_mcp` environment is present.
+
+`docs/github-actions-ci.yml` contains the matching GitHub Actions template. Copy it to `.github/workflows/ci.yml` when pushing with a GitHub credential that has `workflow` scope.
 
 ## Documentation
 

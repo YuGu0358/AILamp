@@ -27,6 +27,8 @@ def hardware_check(args) -> int:
     results = run_static_hardware_checks(config)
     if args.include_devices:
         results.extend(run_device_presence_checks(config))
+    if args.failures_only:
+        results = [result for result in results if not result.passed]
     for result in results:
         print(result.format())
     return 0 if all(result.passed for result in results) else 1
@@ -174,6 +176,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     hardware = subparsers.add_parser("hardware-check")
     hardware.add_argument("--include-devices", action="store_true")
+    hardware.add_argument("--failures-only", action="store_true")
     hardware.set_defaults(func=hardware_check)
 
     led = subparsers.add_parser("led-test")

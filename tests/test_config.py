@@ -31,3 +31,12 @@ def test_loads_camera_path_and_pixel_format():
 
     assert config.camera.device_path == "/dev/video0"
     assert config.camera.pixel_format == "MJPG"
+
+
+def test_hardware_bom_quantities_are_complete():
+    from ailamp.hardware_check import EXPECTED_BOM_QUANTITIES
+
+    config = load_hardware_config(Path("config/hardware.toml"))
+
+    assert set(config.hardware_bom) == set(EXPECTED_BOM_QUANTITIES)
+    assert {key: item.quantity for key, item in config.hardware_bom.items()} == EXPECTED_BOM_QUANTITIES
