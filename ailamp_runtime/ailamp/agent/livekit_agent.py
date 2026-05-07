@@ -5,6 +5,7 @@ from ailamp.paths import resolve_project_path
 from ailamp.services.behavior import BehaviorService
 from ailamp.services.led_serial import LEDSerialService
 from ailamp.services.motor import MotorService
+from ailamp.services.vision_runtime import VisionSnapshot, VisionStateStore
 from ailamp.models import VisionEvent, VisionEventType
 
 
@@ -13,6 +14,7 @@ class AILampToolbox:
         self.config = load_hardware_config(config_path)
         self.behavior = BehaviorService()
         self.last_event = VisionEvent(VisionEventType.NO_PERSON)
+        self.vision_state = VisionStateStore(self.config.runtime.vision_state_file)
         self.led = LEDSerialService(self.config.led.port, self.config.led.count, self.config.led.baudrate)
         self.motors = MotorService(
             self.config.motors.port,
@@ -28,12 +30,38 @@ class AILampToolbox:
         self.motors.connect()
         self._outputs_connected = True
 
+    def current_snapshot(self) -> VisionSnapshot | None:
+        snapshot = self.vision_state.read()
+        if snapshot is not None:
+            self.last_event = snapshot.event
+        return snapshot
+
+    def current_vision_event(self) -> VisionEvent:
+        snapshot = self.current_snapshot()
+        if snapshot is not None:
+            return snapshot.event
+        return self.last_event
+
     def current_vision_state(self) -> str:
-        return self.last_event.event_type.value
+        snapshot = self.current_snapshot()
+        if snapshot is None:
+            return self.last_event.event_type.value
+        action = snapshot.action
+        event = snapshot.event
+        return (
+            f"event={event.event_type.value} confidence={event.confidence:.2f} "
+            f"motion={action.motion} rgb={action.rgb} updated_at={snapshot.updated_at}"
+        )
 
     def motion_for_current_vision(self) -> tuple[str, tuple[int, int, int]]:
-        action = self.behavior.decide(self.last_event)
+        action = self.behavior.decide(self.current_vision_event())
         return action.motion, action.rgb
+
+    def apply_behavior_for_current_vision(self) -> str:
+        self.connect_outputs()
+        event = self.current_vision_event()
+        action = self.behavior.apply(event, self.motors, self.led)
+        return f"applied event={event.event_type.value} motion={action.motion} rgb={action.rgb}"
 
     def play_recording(self, recording_name: str) -> str:
         self.connect_outputs()
@@ -74,6 +102,10 @@ def run_agent(config_path: str) -> None:
             async def suggest_motion_for_vision(self) -> str:
                 motion, rgb = toolbox.motion_for_current_vision()
                 return f"motion={motion} rgb={rgb}"
+
+            @function_tool
+            async def apply_behavior_for_current_vision(self) -> str:
+                return toolbox.apply_behavior_for_current_vision()
 
             @function_tool
             async def play_recording(self, recording_name: str) -> str:

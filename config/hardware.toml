@@ -64,6 +64,11 @@ provider = "openai"
 transport = "livekit"
 enabled = true
 
+[runtime]
+vision_state_file = "outputs/vision_state.json"
+vision_interval_s = 0.2
+action_cooldown_s = 1.5
+
 [birthday]
 enabled = true
 month = 5

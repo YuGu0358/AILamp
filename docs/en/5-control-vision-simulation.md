@@ -36,5 +36,25 @@ ailamp camera-test
 ailamp audio-test
 ailamp led-test
 ailamp vision-demo
+ailamp vision-loop --frames 30
+ailamp vision-loop --with-outputs
 ailamp agent
 ```
+
+`vision-demo` captures one frame and prints the detected event, motion, and LED color.
+
+`vision-loop` is the continuous runtime bridge:
+
+```text
+Arducam UB0234 -> YOLO nano -> VisionEvent -> BehaviorService -> ST3215 + Pico LED
+```
+
+By default it only prints results and writes `outputs/vision_state.json`. Use `--with-outputs` on the Jetson after `led-test` and `motor-test` pass.
+
+Run `vision-loop` alongside `agent` when you want the AI tools to use live camera state. The LiveKit/OpenAI agent reads `outputs/vision_state.json` and exposes tools to:
+
+- read the current vision state
+- suggest the matching motion and LED color
+- apply the current vision behavior to the physical lamp
+- play a named recording
+- set a custom LED color

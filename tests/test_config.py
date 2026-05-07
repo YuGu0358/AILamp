@@ -29,6 +29,9 @@ def test_loads_exact_hardware_bom_and_ports():
     assert config.birthday.message == "Happy birthday, Yugu!"
     assert config.birthday.motion == "happy_wiggle"
     assert config.birthday.rgb == (255, 180, 80)
+    assert config.runtime.vision_state_file == "outputs/vision_state.json"
+    assert config.runtime.vision_interval_s == 0.2
+    assert config.runtime.action_cooldown_s == 1.5
 
 
 def test_loads_camera_path_and_pixel_format():

@@ -14,6 +14,7 @@ from ailamp.services.led_serial import LEDSerialService
 from ailamp.services.motor import MotorService
 from ailamp.services.motor import RecordingStore
 from ailamp.services.vision import classify_person_position
+from ailamp.services.vision_runtime import VisionRuntime
 from ailamp.simulation.mujoco_runner import MujocoRunner
 from ailamp.simulation.sim_vision import classify_virtual_target_from_joints
 
@@ -207,6 +208,25 @@ def vision_demo(args) -> int:
     return 0
 
 
+def vision_loop(args) -> int:
+    config = _config(args)
+    runtime = VisionRuntime(config)
+    try:
+        runtime.open(with_outputs=args.with_outputs)
+        try:
+            for result in runtime.run(
+                max_frames=args.frames,
+                interval_s=args.interval,
+                apply_outputs=args.with_outputs,
+            ):
+                print(result.format())
+        except KeyboardInterrupt:
+            return 130
+    finally:
+        runtime.close()
+    return 0
+
+
 def agent(args) -> int:
     from ailamp.agent.livekit_agent import run_agent
 
@@ -232,6 +252,11 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers.add_parser("camera-test").set_defaults(func=camera_test)
     subparsers.add_parser("audio-test").set_defaults(func=audio_test)
     subparsers.add_parser("vision-demo").set_defaults(func=vision_demo)
+    vision_loop_parser = subparsers.add_parser("vision-loop")
+    vision_loop_parser.add_argument("--frames", type=int, default=None, help="Stop after N frames; omit to run forever")
+    vision_loop_parser.add_argument("--interval", type=float, default=None, help="Seconds between frames")
+    vision_loop_parser.add_argument("--with-outputs", action="store_true", help="Drive ST3215 motions and Pico LEDs")
+    vision_loop_parser.set_defaults(func=vision_loop)
     subparsers.add_parser("agent").set_defaults(func=agent)
 
     birthday = subparsers.add_parser("birthday-check")

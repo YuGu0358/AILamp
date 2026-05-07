@@ -99,6 +99,13 @@ class VoiceConfig:
 
 
 @dataclass(frozen=True)
+class RuntimeConfig:
+    vision_state_file: str
+    vision_interval_s: float
+    action_cooldown_s: float
+
+
+@dataclass(frozen=True)
 class BirthdayConfig:
     enabled: bool
     month: int
@@ -128,6 +135,7 @@ class HardwareConfig:
     vision: VisionConfig
     audio: AudioConfig
     voice: VoiceConfig
+    runtime: RuntimeConfig
     birthday: BirthdayConfig
     simulation: SimulationConfig
     hardware_bom: dict[str, BOMItem]
@@ -157,6 +165,7 @@ def load_hardware_config(path: str | Path) -> HardwareConfig:
         vision=VisionConfig(**raw["vision"]),
         audio=AudioConfig(**raw["audio"]),
         voice=VoiceConfig(**raw["voice"]),
+        runtime=RuntimeConfig(**raw["runtime"]),
         birthday=BirthdayConfig(
             enabled=birthday_raw["enabled"],
             month=birthday_raw["month"],

@@ -1,0 +1,140 @@
+from pathlib import Path
+
+from ailamp.agent.livekit_agent import AILampToolbox
+from ailamp.config import load_hardware_config
+from ailamp.models import BoundingBox, VisionEvent, VisionEventType
+from ailamp.services.behavior import BehaviorService
+from ailamp.services.vision_runtime import VisionRuntime, VisionSnapshot, VisionStateStore
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+CONFIG_PATH = PROJECT_ROOT / "config/hardware.toml"
+
+
+class FakeCamera:
+    def __init__(self, frames):
+        self.frames = list(frames)
+        self.closed = False
+
+    def open(self):
+        pass
+
+    def read(self):
+        if not self.frames:
+            return None
+        return self.frames.pop(0)
+
+    def close(self):
+        self.closed = True
+
+
+class FakeDetector:
+    def __init__(self, boxes):
+        self.boxes = list(boxes)
+        self.loaded = False
+
+    def load(self):
+        self.loaded = True
+
+    def detect_person(self, frame):
+        if not self.boxes:
+            return None
+        return self.boxes.pop(0)
+
+
+class FakeLed:
+    def __init__(self):
+        self.colors = []
+
+    def connect(self):
+        pass
+
+    def solid(self, red, green, blue):
+        self.colors.append((red, green, blue))
+        return "OK"
+
+    def close(self):
+        pass
+
+
+class FakeMotor:
+    def __init__(self):
+        self.recordings = []
+
+    def connect(self):
+        pass
+
+    def play(self, recording_name):
+        self.recordings.append(recording_name)
+
+    def close(self):
+        pass
+
+
+def config():
+    return load_hardware_config(CONFIG_PATH)
+
+
+def test_vision_runtime_writes_state_and_maps_action(tmp_path, monkeypatch):
+    monkeypatch.setenv("AILAMP_PROJECT_ROOT", str(tmp_path))
+    runtime = VisionRuntime(
+        config(),
+        camera=FakeCamera([object()]),
+        detector=FakeDetector([BoundingBox(270, 120, 100, 220, 0.91)]),
+    )
+
+    result = runtime.step()
+    snapshot = VisionStateStore("outputs/vision_state.json").read()
+
+    assert result.snapshot.event.event_type == VisionEventType.PERSON_CENTER
+    assert result.snapshot.action.motion == "nod"
+    assert not result.applied
+    assert snapshot is not None
+    assert snapshot.event.event_type == VisionEventType.PERSON_CENTER
+    assert snapshot.action.rgb == (255, 180, 80)
+
+
+def test_vision_runtime_applies_outputs_with_event_cooldown(tmp_path, monkeypatch):
+    monkeypatch.setenv("AILAMP_PROJECT_ROOT", str(tmp_path))
+    led = FakeLed()
+    motor = FakeMotor()
+    times = iter([0.0, 0.1, 2.0])
+    runtime = VisionRuntime(
+        config(),
+        camera=FakeCamera([object(), object(), object()]),
+        detector=FakeDetector(
+            [
+                BoundingBox(20, 120, 100, 220, 0.9),
+                BoundingBox(20, 120, 100, 220, 0.9),
+                BoundingBox(20, 120, 100, 220, 0.9),
+            ]
+        ),
+        led_service=led,
+        motor_service=motor,
+        clock=lambda: next(times),
+    )
+
+    assert runtime.step(apply_outputs=True).applied
+    assert not runtime.step(apply_outputs=True).applied
+    assert runtime.step(apply_outputs=True).applied
+    assert motor.recordings == ["headshake", "headshake"]
+    assert led.colors == [(80, 120, 255), (80, 120, 255)]
+
+
+def test_agent_toolbox_reads_shared_vision_state(tmp_path, monkeypatch):
+    monkeypatch.setenv("AILAMP_PROJECT_ROOT", str(tmp_path))
+    event = VisionEvent(VisionEventType.PERSON_CLOSE, confidence=0.88)
+    action = BehaviorService().decide(event)
+    store = VisionStateStore("outputs/vision_state.json")
+    store.write(VisionSnapshot(event=event, action=action, updated_at="2026-05-08T09:00:00+00:00", frame_index=7))
+
+    toolbox = AILampToolbox(str(CONFIG_PATH))
+    toolbox.led = FakeLed()
+    toolbox.motors = FakeMotor()
+    toolbox._outputs_connected = True
+
+    assert "event=person_close" in toolbox.current_vision_state()
+    assert toolbox.motion_for_current_vision() == ("shy", (255, 80, 120))
+    assert "applied event=person_close motion=shy" in toolbox.apply_behavior_for_current_vision()
+    assert toolbox.motors.recordings == ["shy"]
+    assert toolbox.led.colors == [(255, 80, 120)]
