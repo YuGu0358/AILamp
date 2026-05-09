@@ -4,6 +4,7 @@ from ailamp.agent.livekit_agent import AILampToolbox
 from ailamp.config import load_hardware_config
 from ailamp.models import BoundingBox, VisionEvent, VisionEventType
 from ailamp.services.behavior import BehaviorService
+from ailamp.services.pose_gesture import PoseKeypoints
 from ailamp.services.vision_runtime import VisionRuntime, VisionSnapshot, VisionStateStore
 
 
@@ -40,6 +41,20 @@ class FakeDetector:
         if not self.boxes:
             return None
         return self.boxes.pop(0)
+
+
+class FakePoseDetector:
+    def __init__(self, poses):
+        self.poses = list(poses)
+        self.loaded = False
+
+    def load(self):
+        self.loaded = True
+
+    def detect_pose(self, frame):
+        if not self.poses:
+            return None
+        return self.poses.pop(0)
 
 
 class FakeLed:
@@ -119,6 +134,46 @@ def test_vision_runtime_applies_outputs_with_event_cooldown(tmp_path, monkeypatc
     assert runtime.step(apply_outputs=True).applied
     assert motor.recordings == ["headshake", "headshake"]
     assert led.colors == [(80, 120, 255), (80, 120, 255)]
+
+
+def test_vision_runtime_prefers_pose_gesture_over_center_position(tmp_path, monkeypatch):
+    monkeypatch.setenv("AILAMP_PROJECT_ROOT", str(tmp_path))
+    runtime = VisionRuntime(
+        config(),
+        camera=FakeCamera([object()]),
+        detector=FakeDetector([BoundingBox(270, 120, 100, 220, 0.91)]),
+        pose_detector=FakePoseDetector(
+            [
+                PoseKeypoints.from_named(
+                    (640, 480),
+                    nose=(320, 150),
+                    left_shoulder=(270, 240),
+                    right_shoulder=(370, 240),
+                    right_wrist=(520, 170),
+                )
+            ]
+        ),
+    )
+
+    result = runtime.step()
+
+    assert result.snapshot.event.event_type == VisionEventType.GESTURE_RIGHT
+    assert result.snapshot.action.motion == "scanning"
+
+
+def test_vision_runtime_turns_departure_into_idle(tmp_path, monkeypatch):
+    monkeypatch.setenv("AILAMP_PROJECT_ROOT", str(tmp_path))
+    runtime = VisionRuntime(
+        config(),
+        camera=FakeCamera([object(), object()]),
+        detector=FakeDetector([BoundingBox(270, 120, 100, 220, 0.91), None]),
+    )
+
+    assert runtime.step().snapshot.event.event_type == VisionEventType.PERSON_CENTER
+    result = runtime.step()
+
+    assert result.snapshot.event.event_type == VisionEventType.PERSON_LEFT_SEAT
+    assert result.snapshot.action.motion == "idle"
 
 
 def test_agent_toolbox_reads_shared_vision_state(tmp_path, monkeypatch):

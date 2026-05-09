@@ -10,6 +10,13 @@ DEFAULT_BEHAVIOR_MAP: dict[VisionEventType, tuple[str, tuple[int, int, int]]] = 
     VisionEventType.PERSON_RIGHT: ("scanning", (80, 120, 255)),
     VisionEventType.PERSON_CLOSE: ("shy", (255, 80, 120)),
     VisionEventType.PERSON_FAR: ("curious", (80, 255, 160)),
+    VisionEventType.PERSON_LEFT_SEAT: ("idle", (30, 30, 80)),
+    VisionEventType.GESTURE_LEFT: ("headshake", (90, 150, 255)),
+    VisionEventType.GESTURE_RIGHT: ("scanning", (90, 150, 255)),
+    VisionEventType.GESTURE_UP: ("curious", (180, 220, 255)),
+    VisionEventType.GESTURE_DOWN: ("idle", (180, 220, 255)),
+    VisionEventType.POSTURE_STUDYING: ("idle", (255, 235, 190)),
+    VisionEventType.LOOKING_AT_LAMP: ("nod", (255, 210, 130)),
 }
 
 

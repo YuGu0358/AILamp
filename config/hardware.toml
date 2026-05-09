@@ -47,6 +47,8 @@ pixel_format = "MJPG"
 
 [vision]
 model = "yolov8n.pt"
+pose_model = "yolov8n-pose.pt"
+pose_enabled = true
 confidence = 0.45
 left_threshold = -0.20
 right_threshold = 0.20

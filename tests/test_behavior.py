@@ -21,6 +21,19 @@ def test_behavior_maps_vision_events_to_motion_and_led():
     assert action.motion == "shy"
     assert action.rgb == (255, 80, 120)
 
+    action = service.decide(VisionEvent(VisionEventType.POSTURE_STUDYING, confidence=0.9))
+    assert action.motion == "idle"
+    assert action.rgb == (255, 235, 190)
+
+    action = service.decide(VisionEvent(VisionEventType.LOOKING_AT_LAMP, confidence=0.9))
+    assert action.motion == "nod"
+
+    action = service.decide(VisionEvent(VisionEventType.GESTURE_LEFT, confidence=0.9))
+    assert action.motion == "headshake"
+
+    action = service.decide(VisionEvent(VisionEventType.GESTURE_UP, confidence=0.9))
+    assert action.motion == "curious"
+
 
 def test_behavior_motions_exist_in_recordings():
     recordings = RecordingStore("ailamp_runtime/ailamp/recordings").list_names()

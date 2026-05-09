@@ -76,6 +76,8 @@ class CameraConfig:
 @dataclass(frozen=True)
 class VisionConfig:
     model: str
+    pose_model: str
+    pose_enabled: bool
     confidence: float
     left_threshold: float
     right_threshold: float

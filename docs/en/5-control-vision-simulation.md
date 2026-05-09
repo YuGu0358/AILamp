@@ -27,6 +27,13 @@ person_center -> nod -> RGB(255, 180, 80)
 person_right -> scanning -> RGB(80, 120, 255)
 person_close -> shy -> RGB(255, 80, 120)
 person_far -> curious -> RGB(80, 255, 160)
+person_left_seat -> idle -> RGB(30, 30, 80)
+gesture_left -> headshake -> RGB(90, 150, 255)
+gesture_right -> scanning -> RGB(90, 150, 255)
+gesture_up -> curious -> RGB(180, 220, 255)
+gesture_down -> idle -> RGB(180, 220, 255)
+posture_studying -> idle -> RGB(255, 235, 190)
+looking_at_lamp -> nod -> RGB(255, 210, 130)
 ```
 
 ## Hardware Demo
@@ -39,6 +46,7 @@ ailamp vision-demo
 ailamp vision-loop --frames 30
 ailamp vision-loop --with-outputs
 ailamp agent-tools-test --event person_close --apply
+ailamp agent-tools-test --event posture_studying --apply
 ailamp agent
 ```
 
@@ -47,10 +55,18 @@ ailamp agent
 `vision-loop` is the continuous runtime bridge:
 
 ```text
-Arducam UB0234 -> YOLO nano -> VisionEvent -> BehaviorService -> ST3215 + Pico LED
+Arducam UB0234 -> YOLO nano + YOLO pose -> VisionEvent -> BehaviorService -> ST3215 + Pico LED
 ```
 
 By default it only prints results and writes `outputs/vision_state.json`. Use `--with-outputs` on the Jetson after `led-test` and `motor-test` pass.
+
+Gesture and posture support is heuristic in this version:
+
+- hand left/right/up/down changes the lamp behavior toward the corresponding position response
+- head down/study posture enables focus lighting
+- looking up at the lamp triggers a nod
+- close person still takes priority and triggers `shy`
+- leaving the seat transitions to `idle`
 
 Run `vision-loop` alongside `agent` when you want the AI tools to use live camera state. The LiveKit/OpenAI agent reads `outputs/vision_state.json` and exposes tools to:
 
@@ -66,4 +82,5 @@ Run `vision-loop` alongside `agent` when you want the AI tools to use live camer
 
 ```bash
 ailamp agent-tools-test --event person_close --apply --recording nod --color 1 2 3
+ailamp agent-tools-test --event posture_studying --apply
 ```

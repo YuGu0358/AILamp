@@ -32,6 +32,8 @@ def test_loads_exact_hardware_bom_and_ports():
     assert config.runtime.vision_state_file == "outputs/vision_state.json"
     assert config.runtime.vision_interval_s == 0.2
     assert config.runtime.action_cooldown_s == 1.5
+    assert config.vision.pose_enabled is True
+    assert config.vision.pose_model == "yolov8n-pose.pt"
 
 
 def test_loads_camera_path_and_pixel_format():

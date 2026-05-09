@@ -12,6 +12,13 @@ class VisionEventType(StrEnum):
     PERSON_RIGHT = "person_right"
     PERSON_CLOSE = "person_close"
     PERSON_FAR = "person_far"
+    PERSON_LEFT_SEAT = "person_left_seat"
+    GESTURE_LEFT = "gesture_left"
+    GESTURE_RIGHT = "gesture_right"
+    GESTURE_UP = "gesture_up"
+    GESTURE_DOWN = "gesture_down"
+    POSTURE_STUDYING = "posture_studying"
+    LOOKING_AT_LAMP = "looking_at_lamp"
 
 
 @dataclass(frozen=True)
@@ -47,4 +54,3 @@ class BehaviorAction:
     motion: str
     rgb: tuple[int, int, int]
     priority: int = 1
-

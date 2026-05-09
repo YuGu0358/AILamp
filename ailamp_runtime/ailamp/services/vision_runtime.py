@@ -14,6 +14,7 @@ from ailamp.services.behavior import BehaviorService
 from ailamp.services.camera import CameraService
 from ailamp.services.led_serial import LEDSerialService
 from ailamp.services.motor import MotorService
+from ailamp.services.pose_gesture import PoseDetectorService, classify_pose_gesture
 from ailamp.services.vision import DetectorService, classify_person_position
 
 
@@ -142,6 +143,7 @@ class VisionRuntime:
         state_store: VisionStateStore | None = None,
         led_service: object | None = None,
         motor_service: object | None = None,
+        pose_detector: object | None = None,
         clock: Callable[[], float] = time.monotonic,
     ):
         self.config = config
@@ -153,6 +155,9 @@ class VisionRuntime:
             config.camera.pixel_format,
         )
         self.detector = detector or DetectorService(config.vision.model, config.vision.confidence)
+        self.pose_detector = pose_detector
+        if self.pose_detector is None and detector is None and config.vision.pose_enabled:
+            self.pose_detector = PoseDetectorService(config.vision.pose_model, config.vision.confidence)
         self.behavior = behavior or BehaviorService()
         self.state_store = state_store or VisionStateStore(config.runtime.vision_state_file)
         self.led_service = led_service
@@ -161,10 +166,13 @@ class VisionRuntime:
         self._frame_index = 0
         self._last_applied_event: VisionEventType | None = None
         self._last_applied_time = -1_000_000.0
+        self._last_seen_person = False
 
     def open(self, *, with_outputs: bool = False) -> None:
         self.camera.open()
         self.detector.load()
+        if self.pose_detector is not None:
+            self.pose_detector.load()
         if with_outputs:
             if self.led_service is None:
                 self.led_service = LEDSerialService(
@@ -191,19 +199,37 @@ class VisionRuntime:
     def step(self, *, apply_outputs: bool = False) -> VisionLoopResult:
         frame = self.camera.read()
         bbox = self.detector.detect_person(frame) if frame is not None else None
-        event = classify_person_position(
+        base_event = classify_person_position(
             bbox,
             (self.config.camera.width, self.config.camera.height),
             left_threshold=self.config.vision.left_threshold,
             right_threshold=self.config.vision.right_threshold,
             close_area_ratio=self.config.vision.close_area_ratio,
         )
+        pose_event = None
+        if frame is not None and bbox is not None and self.pose_detector is not None:
+            pose_event = classify_pose_gesture(self.pose_detector.detect_pose(frame))
+        event = self._choose_event(base_event, pose_event)
         action = self.behavior.decide(event)
         snapshot = VisionSnapshot(event=event, action=action, updated_at=_utc_now(), frame_index=self._frame_index)
         self.state_store.write(snapshot)
         applied = self._apply_if_needed(event, apply_outputs)
         self._frame_index += 1
         return VisionLoopResult(snapshot=snapshot, applied=applied)
+
+    def _choose_event(self, base_event: VisionEvent, pose_event: VisionEvent | None) -> VisionEvent:
+        if base_event.event_type == VisionEventType.NO_PERSON:
+            if self._last_seen_person:
+                self._last_seen_person = False
+                return VisionEvent(VisionEventType.PERSON_LEFT_SEAT)
+            return base_event
+
+        self._last_seen_person = True
+        if base_event.event_type == VisionEventType.PERSON_CLOSE:
+            return base_event
+        if pose_event is not None and pose_event.event_type not in {VisionEventType.NO_PERSON, VisionEventType.PERSON_CENTER}:
+            return pose_event
+        return base_event
 
     def run(
         self,
