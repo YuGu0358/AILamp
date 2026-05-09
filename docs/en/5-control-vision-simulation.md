@@ -38,6 +38,7 @@ ailamp led-test
 ailamp vision-demo
 ailamp vision-loop --frames 30
 ailamp vision-loop --with-outputs
+ailamp agent-tools-test --event person_close --apply
 ailamp agent
 ```
 
@@ -53,8 +54,16 @@ By default it only prints results and writes `outputs/vision_state.json`. Use `-
 
 Run `vision-loop` alongside `agent` when you want the AI tools to use live camera state. The LiveKit/OpenAI agent reads `outputs/vision_state.json` and exposes tools to:
 
+- describe available tools
 - read the current vision state
 - suggest the matching motion and LED color
 - apply the current vision behavior to the physical lamp
+- list available recordings
 - play a named recording
 - set a custom LED color
+
+`agent-tools-test` exercises the same AI-callable methods without requiring LiveKit or hardware. It uses dry-run outputs by default:
+
+```bash
+ailamp agent-tools-test --event person_close --apply --recording nod --color 1 2 3
+```

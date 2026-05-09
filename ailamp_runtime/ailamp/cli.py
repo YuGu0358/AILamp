@@ -2,12 +2,16 @@ from __future__ import annotations
 
 import argparse
 from datetime import date
+from datetime import datetime
+from datetime import timezone
 from pathlib import Path
 import sys
 
+from ailamp.agent.livekit_agent import AILampToolbox, DryRunLEDService, DryRunMotorService
 from ailamp.config import load_hardware_config
 from ailamp.hardware_check import run_device_presence_checks, run_static_hardware_checks
 from ailamp.paths import resolve_project_path
+from ailamp.models import VisionEvent, VisionEventType
 from ailamp.services.behavior import BehaviorService
 from ailamp.services.birthday import BirthdayService
 from ailamp.services.led_serial import LEDSerialService
@@ -15,6 +19,7 @@ from ailamp.services.motor import MotorService
 from ailamp.services.motor import RecordingStore
 from ailamp.services.vision import classify_person_position
 from ailamp.services.vision_runtime import VisionRuntime
+from ailamp.services.vision_runtime import VisionSnapshot, VisionStateStore
 from ailamp.simulation.mujoco_runner import MujocoRunner
 from ailamp.simulation.sim_vision import classify_virtual_target_from_joints
 
@@ -234,6 +239,42 @@ def agent(args) -> int:
     return 0
 
 
+def agent_tools_test(args) -> int:
+    config = _config(args)
+    event = VisionEvent(VisionEventType(args.event), confidence=args.confidence)
+    action = BehaviorService().decide(event)
+    state = VisionSnapshot(
+        event=event,
+        action=action,
+        updated_at=datetime.now(timezone.utc).isoformat(),
+        frame_index=0,
+    )
+    VisionStateStore(config.runtime.vision_state_file).write(state)
+
+    if args.with_outputs:
+        toolbox = AILampToolbox(args.config)
+    else:
+        toolbox = AILampToolbox(
+            args.config,
+            led_service=DryRunLEDService(),
+            motor_service=DryRunMotorService(),
+        )
+        toolbox._outputs_connected = True
+
+    print("capabilities:", toolbox.describe_capabilities())
+    print("vision:", toolbox.current_vision_state())
+    motion, rgb = toolbox.motion_for_current_vision()
+    print(f"suggested: motion={motion} rgb={rgb}")
+
+    if args.apply:
+        print("apply:", toolbox.apply_behavior_for_current_vision())
+    if args.recording:
+        print("recording:", toolbox.play_recording(args.recording))
+    if args.color:
+        print("light:", toolbox.set_light(*args.color))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="ailamp")
     parser.add_argument("--config", default=DEFAULT_CONFIG)
@@ -258,6 +299,18 @@ def build_parser() -> argparse.ArgumentParser:
     vision_loop_parser.add_argument("--with-outputs", action="store_true", help="Drive ST3215 motions and Pico LEDs")
     vision_loop_parser.set_defaults(func=vision_loop)
     subparsers.add_parser("agent").set_defaults(func=agent)
+    agent_tools = subparsers.add_parser("agent-tools-test")
+    agent_tools.add_argument(
+        "--event",
+        choices=[event.value for event in VisionEventType],
+        default=VisionEventType.PERSON_CENTER.value,
+    )
+    agent_tools.add_argument("--confidence", type=float, default=0.9)
+    agent_tools.add_argument("--apply", action="store_true", help="Apply mapped behavior through the toolbox")
+    agent_tools.add_argument("--recording", default=None, help="Play a named recording through the toolbox")
+    agent_tools.add_argument("--color", nargs=3, type=int, default=None, help="Set LED color through the toolbox")
+    agent_tools.add_argument("--with-outputs", action="store_true", help="Use real ST3215 and Pico outputs")
+    agent_tools.set_defaults(func=agent_tools_test)
 
     birthday = subparsers.add_parser("birthday-check")
     birthday.add_argument("--today", default=None, help="Override date as YYYY-MM-DD for testing")

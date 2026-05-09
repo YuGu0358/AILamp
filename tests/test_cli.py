@@ -1,4 +1,9 @@
+from pathlib import Path
+
 from ailamp.cli import main
+
+
+CONFIG_PATH = str(Path(__file__).resolve().parents[1] / "config/hardware.toml")
 
 
 def test_cli_static_hardware_check_passes(capsys):
@@ -74,3 +79,33 @@ def test_cli_vision_loop_uses_runtime(monkeypatch, capsys):
         "closed": True,
     }
     assert "event=person_center" in output
+
+
+def test_cli_agent_tools_test_dry_run(capsys, tmp_path, monkeypatch):
+    monkeypatch.setenv("AILAMP_PROJECT_ROOT", str(tmp_path))
+
+    exit_code = main(
+        [
+            "--config",
+            CONFIG_PATH,
+            "agent-tools-test",
+            "--event",
+            "person_close",
+            "--apply",
+            "--recording",
+            "nod",
+            "--color",
+            "1",
+            "2",
+            "3",
+        ]
+    )
+    output = capsys.readouterr().out
+
+    assert exit_code == 0
+    assert "capabilities:" in output
+    assert "vision: event=person_close" in output
+    assert "suggested: motion=shy rgb=(255, 80, 120)" in output
+    assert "apply: applied event=person_close motion=shy" in output
+    assert "recording: playing nod" in output
+    assert "light: dry-run led solid rgb=(1, 2, 3)" in output

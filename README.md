@@ -79,12 +79,15 @@ ailamp sim-viewer --render outputs/model.png
 ailamp vision-demo
 ailamp vision-loop --frames 30
 ailamp vision-loop --with-outputs
+ailamp agent-tools-test --event person_close --apply
 ailamp agent
 ```
 
 `vision-loop` is the real camera-to-behavior bridge. It reads the Arducam UB0234 camera, runs YOLO person detection, writes the current state to `outputs/vision_state.json`, and maps the event to a motion and LED color. Add `--with-outputs` only on the Jetson after motor and LED tests pass; that flag drives the ST3215 servos and Pico WH LED controller.
 
 `ailamp agent` reads the same vision state file, so OpenAI/LiveKit tools can report the current vision state, suggest the matching motion/light response, or apply that response to the physical outputs.
+
+Use `agent-tools-test` to validate the AI-callable tool layer without LiveKit or hardware. It defaults to dry-run outputs; add `--with-outputs` only on the Jetson after hardware tests pass.
 
 ## Verification
 

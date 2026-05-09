@@ -1,27 +1,69 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from ailamp.config import load_hardware_config
 from ailamp.paths import resolve_project_path
 from ailamp.services.behavior import BehaviorService
 from ailamp.services.led_serial import LEDSerialService
 from ailamp.services.motor import MotorService
+from ailamp.services.motor import RecordingStore
 from ailamp.services.vision_runtime import VisionSnapshot, VisionStateStore
 from ailamp.models import VisionEvent, VisionEventType
 
 
+class DryRunLEDService:
+    def __init__(self):
+        self.commands: list[tuple[int, int, int]] = []
+
+    def connect(self) -> None:
+        pass
+
+    def close(self) -> None:
+        pass
+
+    def solid(self, red: int, green: int, blue: int) -> str:
+        self.commands.append((red, green, blue))
+        return f"dry-run led solid rgb=({red}, {green}, {blue})"
+
+
+class DryRunMotorService:
+    def __init__(self):
+        self.recordings: list[str] = []
+
+    def connect(self) -> None:
+        pass
+
+    def close(self) -> None:
+        pass
+
+    def play(self, recording_name: str) -> None:
+        self.recordings.append(recording_name)
+
+
 class AILampToolbox:
-    def __init__(self, config_path: str):
+    def __init__(self, config_path: str, *, led_service=None, motor_service=None):
         self.config = load_hardware_config(config_path)
         self.behavior = BehaviorService()
         self.last_event = VisionEvent(VisionEventType.NO_PERSON)
         self.vision_state = VisionStateStore(self.config.runtime.vision_state_file)
-        self.led = LEDSerialService(self.config.led.port, self.config.led.count, self.config.led.baudrate)
-        self.motors = MotorService(
+        self.recordings = RecordingStore(self._resolve_recordings_dir(config_path))
+        self.led = led_service or LEDSerialService(self.config.led.port, self.config.led.count, self.config.led.baudrate)
+        self.motors = motor_service or MotorService(
             self.config.motors.port,
             self.config.system.project_name.lower(),
-            resolve_project_path(self.config.simulation.recordings_dir),
+            self.recordings.recordings_dir,
         )
         self._outputs_connected = False
+
+    def _resolve_recordings_dir(self, config_path: str) -> Path:
+        recordings_dir = Path(self.config.simulation.recordings_dir)
+        if recordings_dir.is_absolute():
+            return recordings_dir
+        config_file = Path(config_path)
+        if config_file.is_absolute() and config_file.parent.name == "config":
+            return config_file.parent.parent / recordings_dir
+        return resolve_project_path(recordings_dir)
 
     def connect_outputs(self) -> None:
         if self._outputs_connected:
@@ -57,6 +99,16 @@ class AILampToolbox:
         action = self.behavior.decide(self.current_vision_event())
         return action.motion, action.rgb
 
+    def describe_capabilities(self) -> str:
+        return (
+            "tools=get_vision_state,suggest_motion_for_vision,apply_behavior_for_current_vision,"
+            "list_recordings,play_recording,set_light "
+            f"recordings={','.join(self.recordings.list_names())}"
+        )
+
+    def list_recordings(self) -> str:
+        return ",".join(self.recordings.list_names())
+
     def apply_behavior_for_current_vision(self) -> str:
         self.connect_outputs()
         event = self.current_vision_event()
@@ -90,9 +142,15 @@ def run_agent(config_path: str) -> None:
                 super().__init__(
                     instructions=(
                         "You are AILamp, an interactive robotic desk lamp. "
-                        "Use concise English. You can use motion and light tools to respond."
+                        "Use concise English. Inspect vision state when the user asks what you see. "
+                        "Use motion and light tools for physical responses, and prefer the mapped "
+                        "vision behavior when the user asks the lamp to react to a person."
                     )
                 )
+
+            @function_tool
+            async def describe_capabilities(self) -> str:
+                return toolbox.describe_capabilities()
 
             @function_tool
             async def get_vision_state(self) -> str:
@@ -106,6 +164,10 @@ def run_agent(config_path: str) -> None:
             @function_tool
             async def apply_behavior_for_current_vision(self) -> str:
                 return toolbox.apply_behavior_for_current_vision()
+
+            @function_tool
+            async def list_recordings(self) -> str:
+                return toolbox.list_recordings()
 
             @function_tool
             async def play_recording(self, recording_name: str) -> str:

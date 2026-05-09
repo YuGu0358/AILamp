@@ -133,6 +133,8 @@ def test_agent_toolbox_reads_shared_vision_state(tmp_path, monkeypatch):
     toolbox.motors = FakeMotor()
     toolbox._outputs_connected = True
 
+    assert "apply_behavior_for_current_vision" in toolbox.describe_capabilities()
+    assert "nod" in toolbox.list_recordings()
     assert "event=person_close" in toolbox.current_vision_state()
     assert toolbox.motion_for_current_vision() == ("shy", (255, 80, 120))
     assert "applied event=person_close motion=shy" in toolbox.apply_behavior_for_current_vision()
