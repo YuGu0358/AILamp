@@ -34,6 +34,7 @@ def test_loads_exact_hardware_bom_and_ports():
     assert config.runtime.action_cooldown_s == 1.5
     assert config.vision.pose_enabled is True
     assert config.vision.pose_model == "yolov8n-pose.pt"
+    assert config.vision.far_area_ratio == 0.02
 
 
 def test_loads_camera_path_and_pixel_format():

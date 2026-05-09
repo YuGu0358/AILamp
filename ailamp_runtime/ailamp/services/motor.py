@@ -1,8 +1,38 @@
 from __future__ import annotations
 
 import csv
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
+
+
+@dataclass(frozen=True)
+class JointDeltaCommand:
+    joint: str
+    delta_deg: float
+
+
+DEFAULT_JOINT_LIMITS_DEG: dict[str, tuple[float, float]] = {
+    "base_yaw": (-60.0, 60.0),
+    "base_pitch": (-55.0, 20.0),
+    "elbow_pitch": (20.0, 105.0),
+    "wrist_roll": (-45.0, 45.0),
+    "wrist_pitch": (-25.0, 35.0),
+}
+
+
+class JointSafetyLimiter:
+    def __init__(self, limits: dict[str, tuple[float, float]] | None = None):
+        self.limits = limits or DEFAULT_JOINT_LIMITS_DEG
+
+    def apply(self, current_state: dict[str, float], deltas: list[JointDeltaCommand] | tuple[JointDeltaCommand, ...]) -> dict[str, float]:
+        target = dict(current_state)
+        for command in deltas:
+            low, high = self.limits[command.joint]
+            key = f"{command.joint}.pos"
+            current = target.get(key, 0.0)
+            target[key] = max(low, min(high, current + command.delta_deg))
+        return target
 
 
 class RecordingStore:
@@ -32,6 +62,7 @@ class MotorService:
         self.port = port
         self.lamp_id = lamp_id
         self.recordings = RecordingStore(recordings_dir)
+        self.limiter = JointSafetyLimiter()
         self._animation_service: Optional[object] = None
 
     def connect(self) -> None:
@@ -56,3 +87,32 @@ class MotorService:
         if self._animation_service is None:
             raise RuntimeError("MotorService is not connected")
         self._animation_service.dispatch("play", recording_name)
+
+    def apply_joint_deltas(self, deltas: list[JointDeltaCommand] | tuple[JointDeltaCommand, ...]) -> dict[str, float]:
+        if self._animation_service is None:
+            raise RuntimeError("MotorService is not connected")
+        if not deltas:
+            return {}
+
+        current_state = getattr(self._animation_service, "_current_state", None)
+        if current_state is None:
+            current_state = self._initial_idle_state()
+        target = self.limiter.apply(current_state, deltas)
+
+        robot = getattr(self._animation_service, "robot", None)
+        if robot is None:
+            raise RuntimeError("MotorService robot is not connected")
+
+        # Stop any current recording so this single-frame tracking command is not immediately overwritten.
+        setattr(self._animation_service, "_current_recording", None)
+        setattr(self._animation_service, "_current_actions", [])
+        setattr(self._animation_service, "_interpolation_frames", 0)
+        robot.send_action(target)
+        setattr(self._animation_service, "_current_state", target.copy())
+        return target
+
+    def _initial_idle_state(self) -> dict[str, float]:
+        rows = self.recordings.load("idle")
+        if not rows:
+            return {}
+        return rows[0]

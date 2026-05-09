@@ -82,6 +82,7 @@ class VisionConfig:
     left_threshold: float
     right_threshold: float
     close_area_ratio: float
+    far_area_ratio: float
     far_depth_m: float
 
 

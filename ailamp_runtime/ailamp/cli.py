@@ -11,9 +11,10 @@ from ailamp.agent.livekit_agent import AILampToolbox, DryRunLEDService, DryRunMo
 from ailamp.config import load_hardware_config
 from ailamp.hardware_check import run_device_presence_checks, run_static_hardware_checks
 from ailamp.paths import resolve_project_path
-from ailamp.models import VisionEvent, VisionEventType
+from ailamp.models import BehaviorAction, VisionEvent, VisionEventType
 from ailamp.services.behavior import BehaviorService
 from ailamp.services.birthday import BirthdayService
+from ailamp.services.decision import DecisionService
 from ailamp.services.led_serial import LEDSerialService
 from ailamp.services.motor import MotorService
 from ailamp.services.motor import RecordingStore
@@ -205,6 +206,7 @@ def vision_demo(args) -> int:
             left_threshold=config.vision.left_threshold,
             right_threshold=config.vision.right_threshold,
             close_area_ratio=config.vision.close_area_ratio,
+            far_area_ratio=config.vision.far_area_ratio,
         )
         action = BehaviorService().decide(event)
         print(f"event={event.event_type.value} confidence={event.confidence:.2f} motion={action.motion} rgb={action.rgb}")
@@ -241,13 +243,20 @@ def agent(args) -> int:
 
 def agent_tools_test(args) -> int:
     config = _config(args)
-    event = VisionEvent(VisionEventType(args.event), confidence=args.confidence)
-    action = BehaviorService().decide(event)
+    event = VisionEvent(
+        VisionEventType(args.event),
+        confidence=args.confidence,
+        normalized_offset=args.offset,
+        area_ratio=args.area_ratio,
+    )
+    decision = DecisionService().decide(event, user_text=args.request)
+    action = BehaviorAction(event=event, motion=decision.motion, rgb=decision.rgb)
     state = VisionSnapshot(
         event=event,
         action=action,
         updated_at=datetime.now(timezone.utc).isoformat(),
         frame_index=0,
+        decision=decision,
     )
     VisionStateStore(config.runtime.vision_state_file).write(state)
 
@@ -263,11 +272,12 @@ def agent_tools_test(args) -> int:
 
     print("capabilities:", toolbox.describe_capabilities())
     print("vision:", toolbox.current_vision_state())
-    motion, rgb = toolbox.motion_for_current_vision()
-    print(f"suggested: motion={motion} rgb={rgb}")
+    decision = toolbox.decide_response(args.request)
+    deltas = ",".join(f"{command.joint}:{command.delta_deg:+.2f}" for command in decision.joint_deltas) or "none"
+    print(f"decision: motion={decision.motion} rgb={decision.rgb} joint_deltas={deltas} reason={decision.reason}")
 
     if args.apply:
-        print("apply:", toolbox.apply_behavior_for_current_vision())
+        print("apply:", toolbox.apply_behavior_for_current_vision(args.request))
     if args.recording:
         print("recording:", toolbox.play_recording(args.recording))
     if args.color:
@@ -306,6 +316,9 @@ def build_parser() -> argparse.ArgumentParser:
         default=VisionEventType.PERSON_CENTER.value,
     )
     agent_tools.add_argument("--confidence", type=float, default=0.9)
+    agent_tools.add_argument("--offset", type=float, default=0.0, help="Normalized horizontal person offset, -1 left to +1 right")
+    agent_tools.add_argument("--area-ratio", type=float, default=0.0, help="Detected person bbox area ratio")
+    agent_tools.add_argument("--request", default=None, help="Optional voice/user request to feed the AI decision layer")
     agent_tools.add_argument("--apply", action="store_true", help="Apply mapped behavior through the toolbox")
     agent_tools.add_argument("--recording", default=None, help="Play a named recording through the toolbox")
     agent_tools.add_argument("--color", nargs=3, type=int, default=None, help="Set LED color through the toolbox")

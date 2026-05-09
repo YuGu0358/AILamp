@@ -53,6 +53,7 @@ confidence = 0.45
 left_threshold = -0.20
 right_threshold = 0.20
 close_area_ratio = 0.35
+far_area_ratio = 0.02
 far_depth_m = 3.0
 
 [audio]

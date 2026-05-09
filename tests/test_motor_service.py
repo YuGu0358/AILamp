@@ -2,7 +2,7 @@ import builtins
 
 import pytest
 
-from ailamp.services.motor import MotorService
+from ailamp.services.motor import JointDeltaCommand, JointSafetyLimiter, MotorService
 
 
 def test_motor_service_reports_missing_upstream_runtime(monkeypatch):
@@ -18,3 +18,15 @@ def test_motor_service_reports_missing_upstream_runtime(monkeypatch):
 
     with pytest.raises(RuntimeError, match="upstream LeLamp runtime"):
         service.connect()
+
+
+def test_joint_safety_limiter_clips_delta_targets():
+    limiter = JointSafetyLimiter({"base_yaw": (-10.0, 10.0), "wrist_pitch": (-5.0, 5.0)})
+
+    target = limiter.apply(
+        {"base_yaw.pos": 9.0, "wrist_pitch.pos": -4.0},
+        [JointDeltaCommand("base_yaw", 5.0), JointDeltaCommand("wrist_pitch", -5.0)],
+    )
+
+    assert target["base_yaw.pos"] == 10.0
+    assert target["wrist_pitch.pos"] == -5.0

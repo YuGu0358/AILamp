@@ -105,7 +105,25 @@ def test_cli_agent_tools_test_dry_run(capsys, tmp_path, monkeypatch):
     assert exit_code == 0
     assert "capabilities:" in output
     assert "vision: event=person_close" in output
-    assert "suggested: motion=shy rgb=(255, 80, 120)" in output
-    assert "apply: applied event=person_close motion=shy" in output
+    assert "decision: motion=track rgb=(255, 120, 150) joint_deltas=wrist_pitch:-2.50" in output
+    assert "apply: applied event=person_close motion=track" in output
+    assert "joint_deltas=wrist_pitch:-2.50" in output
     assert "recording: playing nod" in output
     assert "light: dry-run led solid rgb=(1, 2, 3)" in output
+
+
+def test_cli_agent_tools_test_voice_focus_and_tracking(capsys, tmp_path, monkeypatch):
+    monkeypatch.setenv("AILAMP_PROJECT_ROOT", str(tmp_path))
+
+    focus_code = main(["--config", CONFIG_PATH, "agent-tools-test", "--event", "person_right", "--offset", "0.6", "--request", "进入专注模式"])
+    focus_output = capsys.readouterr().out
+    track_code = main(["--config", CONFIG_PATH, "agent-tools-test", "--event", "person_right", "--offset", "0.6", "--request", "看着我并跟随我"])
+    track_output = capsys.readouterr().out
+
+    assert focus_code == 0
+    assert "decision: motion=idle rgb=(255, 235, 190)" in focus_output
+    assert "reason=voice:focus_mode" in focus_output
+    assert track_code == 0
+    assert "decision: motion=track" in track_output
+    assert "joint_deltas=base_yaw:+2.40" in track_output
+    assert "reason=voice:track" in track_output

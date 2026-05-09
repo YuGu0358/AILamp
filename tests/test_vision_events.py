@@ -12,6 +12,7 @@ def test_classifies_camera_person_position():
     assert classify_person_position(BoundingBox(270, 120, 100, 220, 0.8, "person"), frame).event_type == VisionEventType.PERSON_CENTER
     assert classify_person_position(BoundingBox(520, 120, 100, 220, 0.8, "person"), frame).event_type == VisionEventType.PERSON_RIGHT
     assert classify_person_position(BoundingBox(120, 20, 420, 420, 0.9, "person"), frame).event_type == VisionEventType.PERSON_CLOSE
+    assert classify_person_position(BoundingBox(300, 160, 40, 80, 0.7, "person"), frame).event_type == VisionEventType.PERSON_FAR
 
 
 def test_classifies_virtual_target_events():

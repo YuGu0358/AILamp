@@ -81,6 +81,7 @@ ailamp vision-loop --frames 30
 ailamp vision-loop --with-outputs
 ailamp agent-tools-test --event person_close --apply
 ailamp agent-tools-test --event posture_studying --apply
+ailamp agent-tools-test --event person_right --offset 0.6 --request "看着我并跟随我" --apply
 ailamp agent
 ```
 
@@ -88,7 +89,7 @@ ailamp agent
 
 `ailamp agent` reads the same vision state file, so OpenAI/LiveKit tools can report the current vision state, suggest the matching motion/light response, or apply that response to the physical outputs.
 
-Use `agent-tools-test` to validate the AI-callable tool layer without LiveKit or hardware. It defaults to dry-run outputs; add `--with-outputs` only on the Jetson after hardware tests pass.
+Use `agent-tools-test` to validate the AI-callable decision layer without LiveKit or hardware. It defaults to dry-run outputs; add `--with-outputs` only on the Jetson after hardware tests pass. The decision layer can combine vision state and voice intent, including continuous tracking commands such as `base_yaw` left/right and `wrist_pitch` forward/back.
 
 ## Verification
 

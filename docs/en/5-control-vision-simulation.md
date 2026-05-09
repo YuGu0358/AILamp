@@ -47,6 +47,7 @@ ailamp vision-loop --frames 30
 ailamp vision-loop --with-outputs
 ailamp agent-tools-test --event person_close --apply
 ailamp agent-tools-test --event posture_studying --apply
+ailamp agent-tools-test --event person_right --offset 0.6 --request "follow me" --apply
 ailamp agent
 ```
 
@@ -60,6 +61,36 @@ Arducam UB0234 -> YOLO nano + YOLO pose -> VisionEvent -> BehaviorService -> ST3
 
 By default it only prints results and writes `outputs/vision_state.json`. Use `--with-outputs` on the Jetson after `led-test` and `motor-test` pass.
 
+## AI Decision Layer
+
+AILamp uses a local decision layer between vision/voice input and hardware output:
+
+```text
+VisionEvent + optional voice request -> DecisionService -> recording OR joint deltas + LED
+```
+
+Continuous tracking decisions:
+
+```text
+person_left / gesture_left -> base_yaw negative delta
+person_right / gesture_right -> base_yaw positive delta
+person_close -> wrist_pitch negative delta, lamp head leans back
+person_far -> wrist_pitch positive delta, lamp head leans forward
+gesture_up -> wrist_pitch positive delta
+gesture_down -> wrist_pitch negative delta
+```
+
+Voice intent can override the default visual response:
+
+```text
+"focus" / "study" / "专注" / "学习" -> idle + focus warm light
+"nod" / "点头" -> nod
+"follow" / "track" / "跟随" / "看着我" -> continuous tracking
+"idle" / "rest" / "休息" -> idle
+```
+
+Joint delta commands are clipped by a safety limiter before they are sent to the ST3215 layer.
+
 Gesture and posture support is heuristic in this version:
 
 - hand left/right/up/down changes the lamp behavior toward the corresponding position response
@@ -71,6 +102,7 @@ Gesture and posture support is heuristic in this version:
 Run `vision-loop` alongside `agent` when you want the AI tools to use live camera state. The LiveKit/OpenAI agent reads `outputs/vision_state.json` and exposes tools to:
 
 - describe available tools
+- decide a response from vision plus voice intent
 - read the current vision state
 - suggest the matching motion and LED color
 - apply the current vision behavior to the physical lamp
@@ -83,4 +115,5 @@ Run `vision-loop` alongside `agent` when you want the AI tools to use live camer
 ```bash
 ailamp agent-tools-test --event person_close --apply --recording nod --color 1 2 3
 ailamp agent-tools-test --event posture_studying --apply
+ailamp agent-tools-test --event person_right --offset 0.6 --request "follow me" --apply
 ```

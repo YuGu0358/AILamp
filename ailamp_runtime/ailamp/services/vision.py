@@ -12,6 +12,7 @@ def classify_person_position(
     left_threshold: float = -0.20,
     right_threshold: float = 0.20,
     close_area_ratio: float = 0.35,
+    far_area_ratio: float = 0.02,
 ) -> VisionEvent:
     if bbox is None:
         return VisionEvent(VisionEventType.NO_PERSON)
@@ -23,6 +24,8 @@ def classify_person_position(
 
     if area_ratio > close_area_ratio:
         event_type = VisionEventType.PERSON_CLOSE
+    elif area_ratio < far_area_ratio:
+        event_type = VisionEventType.PERSON_FAR
     elif normalized_offset < left_threshold:
         event_type = VisionEventType.PERSON_LEFT
     elif normalized_offset > right_threshold:
@@ -67,4 +70,3 @@ class DetectorService:
                 if best is None or candidate.confidence > best.confidence:
                     best = candidate
         return best
-

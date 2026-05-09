@@ -75,12 +75,17 @@ class FakeLed:
 class FakeMotor:
     def __init__(self):
         self.recordings = []
+        self.joint_deltas = []
 
     def connect(self):
         pass
 
     def play(self, recording_name):
         self.recordings.append(recording_name)
+
+    def apply_joint_deltas(self, deltas):
+        self.joint_deltas.append(tuple(deltas))
+        return {}
 
     def close(self):
         pass
@@ -107,6 +112,8 @@ def test_vision_runtime_writes_state_and_maps_action(tmp_path, monkeypatch):
     assert snapshot is not None
     assert snapshot.event.event_type == VisionEventType.PERSON_CENTER
     assert snapshot.action.rgb == (255, 180, 80)
+    assert snapshot.decision is not None
+    assert snapshot.decision.reason == "behavior_map:person_center"
 
 
 def test_vision_runtime_applies_outputs_with_event_cooldown(tmp_path, monkeypatch):
@@ -132,8 +139,11 @@ def test_vision_runtime_applies_outputs_with_event_cooldown(tmp_path, monkeypatc
     assert runtime.step(apply_outputs=True).applied
     assert not runtime.step(apply_outputs=True).applied
     assert runtime.step(apply_outputs=True).applied
-    assert motor.recordings == ["headshake", "headshake"]
-    assert led.colors == [(80, 120, 255), (80, 120, 255)]
+    assert motor.recordings == []
+    assert len(motor.joint_deltas) == 2
+    assert motor.joint_deltas[0][0].joint == "base_yaw"
+    assert motor.joint_deltas[0][0].delta_deg < 0
+    assert led.colors == [(90, 150, 255), (90, 150, 255)]
 
 
 def test_vision_runtime_prefers_pose_gesture_over_center_position(tmp_path, monkeypatch):
@@ -158,7 +168,8 @@ def test_vision_runtime_prefers_pose_gesture_over_center_position(tmp_path, monk
     result = runtime.step()
 
     assert result.snapshot.event.event_type == VisionEventType.GESTURE_RIGHT
-    assert result.snapshot.action.motion == "scanning"
+    assert result.snapshot.action.motion == "track"
+    assert result.snapshot.decision.joint_deltas[0].joint == "base_yaw"
 
 
 def test_vision_runtime_turns_departure_into_idle(tmp_path, monkeypatch):
@@ -191,7 +202,9 @@ def test_agent_toolbox_reads_shared_vision_state(tmp_path, monkeypatch):
     assert "apply_behavior_for_current_vision" in toolbox.describe_capabilities()
     assert "nod" in toolbox.list_recordings()
     assert "event=person_close" in toolbox.current_vision_state()
-    assert toolbox.motion_for_current_vision() == ("shy", (255, 80, 120))
-    assert "applied event=person_close motion=shy" in toolbox.apply_behavior_for_current_vision()
-    assert toolbox.motors.recordings == ["shy"]
-    assert toolbox.led.colors == [(255, 80, 120)]
+    assert toolbox.motion_for_current_vision() == ("track", (255, 120, 150))
+    assert "applied event=person_close motion=track" in toolbox.apply_behavior_for_current_vision()
+    assert toolbox.motors.recordings == []
+    assert len(toolbox.motors.joint_deltas) == 1
+    assert toolbox.motors.joint_deltas[0][0].joint == "wrist_pitch"
+    assert toolbox.led.colors == [(255, 120, 150)]
