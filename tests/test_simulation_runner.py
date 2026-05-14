@@ -1,4 +1,5 @@
 import math
+from pathlib import Path
 
 import pytest
 
@@ -41,3 +42,17 @@ def test_virtual_vision_can_use_target_slide_joints():
     assert classify_virtual_target_from_joints({"target_slide_x": 0.6, "target_slide_y": -1.5}).event_type == VisionEventType.PERSON_RIGHT
     assert classify_virtual_target_from_joints({"target_slide_x": 0.0, "target_slide_y": -0.45}).event_type == VisionEventType.PERSON_CLOSE
     assert classify_virtual_target_from_joints({"target_slide_x": 0.0, "target_slide_y": -3.8}).event_type == VisionEventType.PERSON_FAR
+
+
+def test_ailamp_adapter_visuals_are_present_in_scene():
+    root = Path(__file__).resolve().parents[1]
+    scene = (root / "simulation/ailamp_scene.xml").read_text()
+
+    for name in [
+        "ailamp_jetson_tray_visual",
+        "ailamp_electronics_deck_visual",
+        "ailamp_camera_mount_visual",
+        "ailamp_neomatrix_visual",
+        "ailamp_respeaker_visual",
+    ]:
+        assert name in scene
