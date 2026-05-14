@@ -23,8 +23,8 @@ def load_generator():
     spec = importlib.util.spec_from_file_location(
         "generate_ailamp_adapters", GENERATOR_PATH
     )
-    module = importlib.util.module_from_spec(spec)
     assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
