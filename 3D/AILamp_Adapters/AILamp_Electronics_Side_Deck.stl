@@ -99,72 +99,72 @@ solid AILamp_Electronics_Side_Deck
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex -65.0000 19.0000 9.0000
-      vertex -5.0000 19.0000 9.0000
-      vertex -5.0000 23.0000 9.0000
+      vertex -65.0000 19.0000 10.0000
+      vertex -5.0000 19.0000 10.0000
+      vertex -5.0000 23.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex -65.0000 19.0000 9.0000
-      vertex -5.0000 23.0000 9.0000
-      vertex -65.0000 23.0000 9.0000
+      vertex -65.0000 19.0000 10.0000
+      vertex -5.0000 23.0000 10.0000
+      vertex -65.0000 23.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -65.0000 19.0000 3.0000
       vertex -5.0000 19.0000 3.0000
-      vertex -5.0000 19.0000 9.0000
+      vertex -5.0000 19.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -65.0000 19.0000 3.0000
-      vertex -5.0000 19.0000 9.0000
-      vertex -65.0000 19.0000 9.0000
+      vertex -5.0000 19.0000 10.0000
+      vertex -65.0000 19.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -5.0000 19.0000 3.0000
       vertex -5.0000 23.0000 3.0000
-      vertex -5.0000 23.0000 9.0000
+      vertex -5.0000 23.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -5.0000 19.0000 3.0000
-      vertex -5.0000 23.0000 9.0000
-      vertex -5.0000 19.0000 9.0000
+      vertex -5.0000 23.0000 10.0000
+      vertex -5.0000 19.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -5.0000 23.0000 3.0000
       vertex -65.0000 23.0000 3.0000
-      vertex -65.0000 23.0000 9.0000
+      vertex -65.0000 23.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -5.0000 23.0000 3.0000
-      vertex -65.0000 23.0000 9.0000
-      vertex -5.0000 23.0000 9.0000
+      vertex -65.0000 23.0000 10.0000
+      vertex -5.0000 23.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -65.0000 23.0000 3.0000
       vertex -65.0000 19.0000 3.0000
-      vertex -65.0000 19.0000 9.0000
+      vertex -65.0000 19.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -65.0000 23.0000 3.0000
-      vertex -65.0000 19.0000 9.0000
-      vertex -65.0000 23.0000 9.0000
+      vertex -65.0000 19.0000 10.0000
+      vertex -65.0000 23.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
@@ -183,240 +183,240 @@ solid AILamp_Electronics_Side_Deck
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex -65.0000 -23.0000 9.0000
-      vertex -5.0000 -23.0000 9.0000
-      vertex -5.0000 -19.0000 9.0000
+      vertex -65.0000 -23.0000 10.0000
+      vertex -5.0000 -23.0000 10.0000
+      vertex -5.0000 -19.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex -65.0000 -23.0000 9.0000
-      vertex -5.0000 -19.0000 9.0000
-      vertex -65.0000 -19.0000 9.0000
+      vertex -65.0000 -23.0000 10.0000
+      vertex -5.0000 -19.0000 10.0000
+      vertex -65.0000 -19.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -65.0000 -23.0000 3.0000
       vertex -5.0000 -23.0000 3.0000
-      vertex -5.0000 -23.0000 9.0000
+      vertex -5.0000 -23.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -65.0000 -23.0000 3.0000
-      vertex -5.0000 -23.0000 9.0000
-      vertex -65.0000 -23.0000 9.0000
+      vertex -5.0000 -23.0000 10.0000
+      vertex -65.0000 -23.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -5.0000 -23.0000 3.0000
       vertex -5.0000 -19.0000 3.0000
-      vertex -5.0000 -19.0000 9.0000
+      vertex -5.0000 -19.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -5.0000 -23.0000 3.0000
-      vertex -5.0000 -19.0000 9.0000
-      vertex -5.0000 -23.0000 9.0000
+      vertex -5.0000 -19.0000 10.0000
+      vertex -5.0000 -23.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -5.0000 -19.0000 3.0000
       vertex -65.0000 -19.0000 3.0000
-      vertex -65.0000 -19.0000 9.0000
+      vertex -65.0000 -19.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -5.0000 -19.0000 3.0000
-      vertex -65.0000 -19.0000 9.0000
-      vertex -5.0000 -19.0000 9.0000
+      vertex -65.0000 -19.0000 10.0000
+      vertex -5.0000 -19.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -65.0000 -19.0000 3.0000
       vertex -65.0000 -23.0000 3.0000
-      vertex -65.0000 -23.0000 9.0000
+      vertex -65.0000 -23.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -65.0000 -19.0000 3.0000
-      vertex -65.0000 -23.0000 9.0000
-      vertex -65.0000 -19.0000 9.0000
+      vertex -65.0000 -23.0000 10.0000
+      vertex -65.0000 -19.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 5.0000 19.0000 3.0000
-      vertex 79.0000 23.0000 3.0000
-      vertex 79.0000 19.0000 3.0000
+      vertex -1.5000 19.0000 3.0000
+      vertex 72.5000 23.0000 3.0000
+      vertex 72.5000 19.0000 3.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 5.0000 19.0000 3.0000
-      vertex 5.0000 23.0000 3.0000
-      vertex 79.0000 23.0000 3.0000
+      vertex -1.5000 19.0000 3.0000
+      vertex -1.5000 23.0000 3.0000
+      vertex 72.5000 23.0000 3.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 5.0000 19.0000 9.0000
-      vertex 79.0000 19.0000 9.0000
-      vertex 79.0000 23.0000 9.0000
+      vertex -1.5000 19.0000 10.0000
+      vertex 72.5000 19.0000 10.0000
+      vertex 72.5000 23.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 5.0000 19.0000 9.0000
-      vertex 79.0000 23.0000 9.0000
-      vertex 5.0000 23.0000 9.0000
+      vertex -1.5000 19.0000 10.0000
+      vertex 72.5000 23.0000 10.0000
+      vertex -1.5000 23.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 5.0000 19.0000 3.0000
-      vertex 79.0000 19.0000 3.0000
-      vertex 79.0000 19.0000 9.0000
+      vertex -1.5000 19.0000 3.0000
+      vertex 72.5000 19.0000 3.0000
+      vertex 72.5000 19.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 5.0000 19.0000 3.0000
-      vertex 79.0000 19.0000 9.0000
-      vertex 5.0000 19.0000 9.0000
+      vertex -1.5000 19.0000 3.0000
+      vertex 72.5000 19.0000 10.0000
+      vertex -1.5000 19.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 79.0000 19.0000 3.0000
-      vertex 79.0000 23.0000 3.0000
-      vertex 79.0000 23.0000 9.0000
+      vertex 72.5000 19.0000 3.0000
+      vertex 72.5000 23.0000 3.0000
+      vertex 72.5000 23.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 79.0000 19.0000 3.0000
-      vertex 79.0000 23.0000 9.0000
-      vertex 79.0000 19.0000 9.0000
+      vertex 72.5000 19.0000 3.0000
+      vertex 72.5000 23.0000 10.0000
+      vertex 72.5000 19.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 79.0000 23.0000 3.0000
-      vertex 5.0000 23.0000 3.0000
-      vertex 5.0000 23.0000 9.0000
+      vertex 72.5000 23.0000 3.0000
+      vertex -1.5000 23.0000 3.0000
+      vertex -1.5000 23.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 79.0000 23.0000 3.0000
-      vertex 5.0000 23.0000 9.0000
-      vertex 79.0000 23.0000 9.0000
+      vertex 72.5000 23.0000 3.0000
+      vertex -1.5000 23.0000 10.0000
+      vertex 72.5000 23.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 5.0000 23.0000 3.0000
-      vertex 5.0000 19.0000 3.0000
-      vertex 5.0000 19.0000 9.0000
+      vertex -1.5000 23.0000 3.0000
+      vertex -1.5000 19.0000 3.0000
+      vertex -1.5000 19.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 5.0000 23.0000 3.0000
-      vertex 5.0000 19.0000 9.0000
-      vertex 5.0000 23.0000 9.0000
+      vertex -1.5000 23.0000 3.0000
+      vertex -1.5000 19.0000 10.0000
+      vertex -1.5000 23.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 5.0000 -23.0000 3.0000
-      vertex 79.0000 -19.0000 3.0000
-      vertex 79.0000 -23.0000 3.0000
+      vertex -1.5000 -23.0000 3.0000
+      vertex 72.5000 -19.0000 3.0000
+      vertex 72.5000 -23.0000 3.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 5.0000 -23.0000 3.0000
-      vertex 5.0000 -19.0000 3.0000
-      vertex 79.0000 -19.0000 3.0000
+      vertex -1.5000 -23.0000 3.0000
+      vertex -1.5000 -19.0000 3.0000
+      vertex 72.5000 -19.0000 3.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 5.0000 -23.0000 9.0000
-      vertex 79.0000 -23.0000 9.0000
-      vertex 79.0000 -19.0000 9.0000
+      vertex -1.5000 -23.0000 10.0000
+      vertex 72.5000 -23.0000 10.0000
+      vertex 72.5000 -19.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 5.0000 -23.0000 9.0000
-      vertex 79.0000 -19.0000 9.0000
-      vertex 5.0000 -19.0000 9.0000
+      vertex -1.5000 -23.0000 10.0000
+      vertex 72.5000 -19.0000 10.0000
+      vertex -1.5000 -19.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 5.0000 -23.0000 3.0000
-      vertex 79.0000 -23.0000 3.0000
-      vertex 79.0000 -23.0000 9.0000
+      vertex -1.5000 -23.0000 3.0000
+      vertex 72.5000 -23.0000 3.0000
+      vertex 72.5000 -23.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 5.0000 -23.0000 3.0000
-      vertex 79.0000 -23.0000 9.0000
-      vertex 5.0000 -23.0000 9.0000
+      vertex -1.5000 -23.0000 3.0000
+      vertex 72.5000 -23.0000 10.0000
+      vertex -1.5000 -23.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 79.0000 -23.0000 3.0000
-      vertex 79.0000 -19.0000 3.0000
-      vertex 79.0000 -19.0000 9.0000
+      vertex 72.5000 -23.0000 3.0000
+      vertex 72.5000 -19.0000 3.0000
+      vertex 72.5000 -19.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 79.0000 -23.0000 3.0000
-      vertex 79.0000 -19.0000 9.0000
-      vertex 79.0000 -23.0000 9.0000
+      vertex 72.5000 -23.0000 3.0000
+      vertex 72.5000 -19.0000 10.0000
+      vertex 72.5000 -23.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 79.0000 -19.0000 3.0000
-      vertex 5.0000 -19.0000 3.0000
-      vertex 5.0000 -19.0000 9.0000
+      vertex 72.5000 -19.0000 3.0000
+      vertex -1.5000 -19.0000 3.0000
+      vertex -1.5000 -19.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 79.0000 -19.0000 3.0000
-      vertex 5.0000 -19.0000 9.0000
-      vertex 79.0000 -19.0000 9.0000
+      vertex 72.5000 -19.0000 3.0000
+      vertex -1.5000 -19.0000 10.0000
+      vertex 72.5000 -19.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 5.0000 -19.0000 3.0000
-      vertex 5.0000 -23.0000 3.0000
-      vertex 5.0000 -23.0000 9.0000
+      vertex -1.5000 -19.0000 3.0000
+      vertex -1.5000 -23.0000 3.0000
+      vertex -1.5000 -23.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 5.0000 -19.0000 3.0000
-      vertex 5.0000 -23.0000 9.0000
-      vertex 5.0000 -19.0000 9.0000
+      vertex -1.5000 -19.0000 3.0000
+      vertex -1.5000 -23.0000 10.0000
+      vertex -1.5000 -19.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0

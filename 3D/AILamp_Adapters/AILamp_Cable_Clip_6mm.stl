@@ -1,4 +1,4 @@
-solid AILamp_Cable_Clip_8mm
+solid AILamp_Cable_Clip_6mm
   facet normal 0 0 0
     outer loop
       vertex -12.0000 -9.0000 0.0000
@@ -419,4 +419,4 @@ solid AILamp_Cable_Clip_8mm
       vertex -12.0000 9.0000 8.0000
     endloop
   endfacet
-endsolid AILamp_Cable_Clip_8mm
+endsolid AILamp_Cable_Clip_6mm

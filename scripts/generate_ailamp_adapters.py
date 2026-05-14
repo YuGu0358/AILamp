@@ -18,6 +18,19 @@ RESPEAKER_CASE_MM = (86.0, 35.0)
 
 
 CORE_NAMESPACE = "http://schemas.microsoft.com/3dmanufacturing/core/2015/02"
+FIXED_ZIP_TIMESTAMP = (2026, 1, 1, 0, 0, 0)
+ELECTRONICS_SIDE_DECK_WIRING_ALLOWANCE_MM = (26.0, 15.0)
+
+
+def _loose_pcb_pocket(board_mm: tuple[float, float]) -> tuple[float, float]:
+    return (
+        board_mm[0] + 2.0 * PCB_EDGE_CLEARANCE_MM,
+        board_mm[1] + 2.0 * PCB_EDGE_CLEARANCE_MM,
+    )
+
+
+def _loose_cable_channel_width(nominal_width_mm: float) -> float:
+    return nominal_width_mm + CABLE_EXIT_EXTRA_WIDTH_MM
 
 
 @dataclass(frozen=True)
@@ -29,47 +42,56 @@ class AdapterSpec:
 
 
 def adapter_specs() -> list[AdapterSpec]:
+    electronics_pocket = (
+        SERVO_DRIVER_BOARD_MM[0]
+        + PICO_BOARD_MM[0]
+        + 2.0 * PCB_EDGE_CLEARANCE_MM
+        + ELECTRONICS_SIDE_DECK_WIRING_ALLOWANCE_MM[0],
+        max(SERVO_DRIVER_BOARD_MM[1], PICO_BOARD_MM[1])
+        + 2.0 * PCB_EDGE_CLEARANCE_MM
+        + ELECTRONICS_SIDE_DECK_WIRING_ALLOWANCE_MM[1],
+    )
     return [
         AdapterSpec(
             "AILamp_Jetson_Nano_Base_Tray",
             (122.0, 102.0, 12.0),
-            (103.0, 83.0),
+            _loose_pcb_pocket(JETSON_BOARD_MM),
             "Loose external Jetson Nano tray",
         ),
         AdapterSpec(
             "AILamp_Electronics_Side_Deck",
             (145.0, 48.0, 10.0),
-            (145.0, 48.0),
+            electronics_pocket,
             "Servo driver and Pico WH side deck",
         ),
         AdapterSpec(
             "AILamp_Head_Camera_Mount",
             (48.0, 42.0, 10.0),
-            (35.0, 35.0),
+            _loose_pcb_pocket(CAMERA_BOARD_MM),
             "Arducam UB0234 reversible head mount",
         ),
         AdapterSpec(
             "AILamp_NeoMatrix_Holder",
             (86.0, 86.0, 8.0),
-            (74.17, 74.17),
+            _loose_pcb_pocket(NEOMATRIX_BOARD_MM),
             "Loose NeoMatrix holder behind diffuser",
         ),
         AdapterSpec(
             "AILamp_ReSpeaker_External_Mount",
             (101.0, 50.0, 9.0),
-            (89.0, 38.0),
+            _loose_pcb_pocket(RESPEAKER_CASE_MM),
             "External ReSpeaker XVF3800 mount",
         ),
         AdapterSpec(
             "AILamp_Cable_Clip_6mm",
             (24.0, 18.0, 8.0),
-            (8.5, 8.0),
+            (_loose_cable_channel_width(6.0), 8.0),
             "Loose cable clip for USB and signal wires",
         ),
         AdapterSpec(
             "AILamp_Cable_Clip_10mm",
             (30.0, 22.0, 10.0),
-            (12.5, 10.0),
+            (_loose_cable_channel_width(10.0), 10.0),
             "Loose cable clip for power or servo bundles",
         ),
     ]
@@ -189,9 +211,16 @@ class Mesh:
 </Relationships>
 """
         with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-            archive.writestr("[Content_Types].xml", content_types)
-            archive.writestr("_rels/.rels", rels)
-            archive.writestr("3D/3dmodel.model", model)
+            _write_zip_entry(archive, "[Content_Types].xml", content_types)
+            _write_zip_entry(archive, "_rels/.rels", rels)
+            _write_zip_entry(archive, "3D/3dmodel.model", model)
+
+
+def _write_zip_entry(archive: zipfile.ZipFile, filename: str, text: str) -> None:
+    info = zipfile.ZipInfo(filename=filename, date_time=FIXED_ZIP_TIMESTAMP)
+    info.compress_type = zipfile.ZIP_DEFLATED
+    info.external_attr = 0o644 << 16
+    archive.writestr(info, text.encode("utf-8"))
 
 
 def _base_plate(mesh: Mesh, outer_mm: tuple[float, float, float], thickness: float) -> None:
@@ -247,7 +276,7 @@ def build_jetson_tray() -> Mesh:
     mesh = Mesh("AILamp_Jetson_Nano_Base_Tray")
     outer = (122.0, 102.0, 12.0)
     _base_plate(mesh, outer, 3.0)
-    _edge_rails(mesh, outer, 4.0, 7.0, 3.0)
+    _edge_rails(mesh, outer, 4.0, 9.0, 3.0)
     for x in (-42.0, 42.0):
         for y in (-32.0, 32.0):
             mesh.add_box(x, y, 5.0, 8.0, 8.0, 4.0)
@@ -259,10 +288,10 @@ def build_electronics_side_deck() -> Mesh:
     mesh = Mesh("AILamp_Electronics_Side_Deck")
     outer = (145.0, 48.0, 10.0)
     _base_plate(mesh, outer, 3.0)
-    mesh.add_box(-35.0, 21.0, 6.0, 60.0, 4.0, 6.0)
-    mesh.add_box(-35.0, -21.0, 6.0, 60.0, 4.0, 6.0)
-    mesh.add_box(42.0, 21.0, 6.0, 74.0, 4.0, 6.0)
-    mesh.add_box(42.0, -21.0, 6.0, 74.0, 4.0, 6.0)
+    mesh.add_box(-35.0, 21.0, 6.5, 60.0, 4.0, 7.0)
+    mesh.add_box(-35.0, -21.0, 6.5, 60.0, 4.0, 7.0)
+    mesh.add_box(35.5, 21.0, 6.5, 74.0, 4.0, 7.0)
+    mesh.add_box(35.5, -21.0, 6.5, 74.0, 4.0, 7.0)
     mesh.add_box(0.0, 0.0, 5.0, 5.0, 42.0, 4.0)
     for x in (-65.0, -5.0, 18.0, 68.0):
         mesh.add_box(x, 0.0, 5.0, 6.0, 8.0, 4.0)
@@ -282,7 +311,7 @@ def build_camera_mount() -> Mesh:
         (14.0, 14.0, screw_clearance, screw_clearance),
     )
     _plate_with_square_cutouts(mesh, outer_x, outer_y, plate_thickness, cutouts)
-    _edge_rails(mesh, (outer_x, outer_y, 10.0), 3.0, 5.0, 3.0)
+    _edge_rails(mesh, (outer_x, outer_y, 10.0), 3.0, 7.0, 3.0)
     # Raised bosses stop short of each 3.4 x 3.4 mm through-gap.
     for x in (-14.0, 14.0):
         for y in (-14.0, 14.0):
@@ -309,7 +338,7 @@ def build_respeaker_mount() -> Mesh:
     mesh = Mesh("AILamp_ReSpeaker_External_Mount")
     outer = (101.0, 50.0, 9.0)
     _base_plate(mesh, outer, 3.0)
-    _edge_rails(mesh, outer, 4.0, 5.0, 3.0)
+    _edge_rails(mesh, outer, 4.0, 6.0, 3.0)
     mesh.add_box(-43.0, 0.0, 5.5, 5.0, 36.0, 4.0)
     mesh.add_box(43.0, 0.0, 5.5, 5.0, 36.0, 4.0)
     for x in (-30.0, 0.0, 30.0):
@@ -318,8 +347,10 @@ def build_respeaker_mount() -> Mesh:
     return mesh
 
 
-def build_cable_clip(channel_width_mm: float, outer_mm: tuple[float, float, float]) -> Mesh:
-    mesh = Mesh(f"AILamp_Cable_Clip_{int(channel_width_mm)}mm")
+def build_cable_clip(
+    name: str, channel_width_mm: float, outer_mm: tuple[float, float, float]
+) -> Mesh:
+    mesh = Mesh(name)
     sx, sy, sz = outer_mm
     wall = max(3.0, (sx - channel_width_mm) / 2.0)
     _base_plate(mesh, outer_mm, 2.5)
@@ -339,8 +370,16 @@ def generate_all(output_dir: Path | str = Path("3D/AILamp_Adapters")) -> list[Pa
         "AILamp_Head_Camera_Mount": build_camera_mount,
         "AILamp_NeoMatrix_Holder": build_neomatrix_holder,
         "AILamp_ReSpeaker_External_Mount": build_respeaker_mount,
-        "AILamp_Cable_Clip_6mm": lambda: build_cable_clip(8.5, (24.0, 18.0, 8.0)),
-        "AILamp_Cable_Clip_10mm": lambda: build_cable_clip(12.5, (30.0, 22.0, 10.0)),
+        "AILamp_Cable_Clip_6mm": lambda: build_cable_clip(
+            "AILamp_Cable_Clip_6mm",
+            _loose_cable_channel_width(6.0),
+            (24.0, 18.0, 8.0),
+        ),
+        "AILamp_Cable_Clip_10mm": lambda: build_cable_clip(
+            "AILamp_Cable_Clip_10mm",
+            _loose_cable_channel_width(10.0),
+            (30.0, 22.0, 10.0),
+        ),
     }
     written: list[Path] = []
     for spec in adapter_specs():

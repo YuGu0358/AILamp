@@ -35,16 +35,54 @@ def sha256(path):
 
 
 def parse_3mf_bounds(path):
+    vertices, _triangles = parse_3mf_mesh(path)
+    xs = [x for x, _y, _z in vertices]
+    ys = [y for _x, y, _z in vertices]
+    zs = [z for _x, _y, z in vertices]
+    return max(xs) - min(xs), max(ys) - min(ys), max(zs) - min(zs)
+
+
+def parse_3mf_mesh(path):
     namespace = {"core": "http://schemas.microsoft.com/3dmanufacturing/core/2015/02"}
     with zipfile.ZipFile(path) as archive:
+        assert set(archive.namelist()) == {
+            "[Content_Types].xml",
+            "_rels/.rels",
+            "3D/3dmodel.model",
+        }
         with archive.open("3D/3dmodel.model") as model_file:
             root = ET.parse(model_file).getroot()
 
     vertices = root.findall(".//core:vertex", namespace)
-    xs = [float(vertex.attrib["x"]) for vertex in vertices]
-    ys = [float(vertex.attrib["y"]) for vertex in vertices]
-    zs = [float(vertex.attrib["z"]) for vertex in vertices]
-    return max(xs) - min(xs), max(ys) - min(ys), max(zs) - min(zs)
+    triangles = root.findall(".//core:triangle", namespace)
+    parsed_vertices = [
+        (
+            float(vertex.attrib["x"]),
+            float(vertex.attrib["y"]),
+            float(vertex.attrib["z"]),
+        )
+        for vertex in vertices
+    ]
+    parsed_triangles = [
+        (
+            int(triangle.attrib["v1"]),
+            int(triangle.attrib["v2"]),
+            int(triangle.attrib["v3"]),
+        )
+        for triangle in triangles
+    ]
+    return parsed_vertices, parsed_triangles
+
+
+def assert_3mf_triangle_indices_are_valid(path):
+    vertices, triangles = parse_3mf_mesh(path)
+    assert vertices
+    assert triangles
+    vertex_count = len(vertices)
+    for triangle in triangles:
+        assert len(set(triangle)) == 3
+        for index in triangle:
+            assert 0 <= index < vertex_count
 
 
 def test_adapter_specs_use_loose_fit_clearances():
@@ -56,11 +94,30 @@ def test_adapter_specs_use_loose_fit_clearances():
     assert generator.M12_LENS_RADIAL_CLEARANCE_MM == 1.0
 
     specs = {spec.name: spec for spec in generator.adapter_specs()}
-    assert specs["AILamp_Jetson_Nano_Base_Tray"].board_pocket_mm == (103.0, 83.0)
+    pcb_clearance = generator.PCB_EDGE_CLEARANCE_MM * 2.0
+    assert specs["AILamp_Jetson_Nano_Base_Tray"].board_pocket_mm == (
+        generator.JETSON_BOARD_MM[0] + pcb_clearance,
+        generator.JETSON_BOARD_MM[1] + pcb_clearance,
+    )
     assert specs["AILamp_Electronics_Side_Deck"].board_pocket_mm == (145.0, 48.0)
-    assert specs["AILamp_Head_Camera_Mount"].board_pocket_mm == (35.0, 35.0)
-    assert specs["AILamp_NeoMatrix_Holder"].board_pocket_mm == (74.17, 74.17)
-    assert specs["AILamp_ReSpeaker_External_Mount"].board_pocket_mm == (89.0, 38.0)
+    assert specs["AILamp_Head_Camera_Mount"].board_pocket_mm == (
+        generator.CAMERA_BOARD_MM[0] + pcb_clearance,
+        generator.CAMERA_BOARD_MM[1] + pcb_clearance,
+    )
+    assert specs["AILamp_NeoMatrix_Holder"].board_pocket_mm == (
+        generator.NEOMATRIX_BOARD_MM[0] + pcb_clearance,
+        generator.NEOMATRIX_BOARD_MM[1] + pcb_clearance,
+    )
+    assert specs["AILamp_ReSpeaker_External_Mount"].board_pocket_mm == (
+        generator.RESPEAKER_CASE_MM[0] + pcb_clearance,
+        generator.RESPEAKER_CASE_MM[1] + pcb_clearance,
+    )
+    assert specs["AILamp_Cable_Clip_6mm"].board_pocket_mm[0] == (
+        6.0 + generator.CABLE_EXIT_EXTRA_WIDTH_MM
+    )
+    assert specs["AILamp_Cable_Clip_10mm"].board_pocket_mm[0] == (
+        10.0 + generator.CABLE_EXIT_EXTRA_WIDTH_MM
+    )
 
 
 def test_generator_writes_all_adapter_files_without_touching_originals(tmp_path):
@@ -112,3 +169,46 @@ def test_generator_writes_all_adapter_files_without_touching_originals(tmp_path)
     assert neo_matrix_bounds[1] >= 86.0
 
     assert {path: sha256(path) for path in ORIGINAL_PRINT_FILES} == original_hashes
+
+
+def test_generated_adapter_files_match_specs_and_are_reproducible(tmp_path):
+    generator = load_generator()
+    first_output_dir = tmp_path / "first"
+    second_output_dir = tmp_path / "second"
+    specs = {spec.name: spec for spec in generator.adapter_specs()}
+
+    generator.generate_all(first_output_dir)
+    generator.generate_all(str(second_output_dir))
+
+    for adapter_name, spec in specs.items():
+        first_3mf = first_output_dir / f"{adapter_name}.3mf"
+        second_3mf = second_output_dir / f"{adapter_name}.3mf"
+        first_stl = first_output_dir / f"{adapter_name}.stl"
+        second_stl = second_output_dir / f"{adapter_name}.stl"
+
+        assert first_3mf.read_bytes() == second_3mf.read_bytes()
+        assert first_stl.read_bytes() == second_stl.read_bytes()
+
+        assert tuple(round(value, 2) for value in parse_3mf_bounds(first_3mf)) == (
+            round(spec.outer_mm[0], 2),
+            round(spec.outer_mm[1], 2),
+            round(spec.outer_mm[2], 2),
+        )
+        assert_3mf_triangle_indices_are_valid(first_3mf)
+
+        stl_lines = first_stl.read_text().splitlines()
+        assert stl_lines[0] == f"solid {adapter_name}"
+        assert stl_lines[-1] == f"endsolid {adapter_name}"
+
+
+def test_checked_in_adapter_files_match_fresh_generation(tmp_path):
+    generator = load_generator()
+    generated_dir = tmp_path / "generated"
+
+    generator.generate_all(generated_dir)
+
+    for spec in generator.adapter_specs():
+        for suffix in (".3mf", ".stl"):
+            checked_in = ROOT / "3D/AILamp_Adapters" / f"{spec.name}{suffix}"
+            generated = generated_dir / f"{spec.name}{suffix}"
+            assert checked_in.read_bytes() == generated.read_bytes()

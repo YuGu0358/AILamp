@@ -40,20 +40,25 @@ def test_docs_list_all_vision_event_types():
 
 def test_assembly_docs_include_adapter_installation_and_fit_rules():
     root = Path(__file__).resolve().parents[1]
-    docs_text = "\n".join(
-        [
-            (root / "docs/en/3-assembly.md").read_text(),
-            (root / "docs/zh/3-装配.md").read_text(),
-        ]
-    )
+    english = (root / "docs/en/3-assembly.md").read_text()
+    chinese = (root / "docs/zh/3-装配.md").read_text()
 
-    for filename in ADAPTER_PRINT_FILES:
-        assert filename in docs_text
+    for docs_text in (english, chinese):
+        for filename in ADAPTER_PRINT_FILES:
+            assert filename in docs_text
 
-    assert "Do not cut `LampHead.3mf`" in docs_text
-    assert "不要切割 `LampHead.3mf`" in docs_text
-    assert "slightly loose" in docs_text
-    assert "不要卡死" in docs_text
+    assert "Do not cut `LampHead.3mf`" in english
+    assert "不要切割 `LampHead.3mf`" in chinese
+    assert "slightly loose" in english
+    assert "不要卡死" in chinese
+    assert "ailamp hardware-check" in english
+    assert "ailamp hardware-check" in chinese
+    assert "ailamp led-test" in english
+    assert "ailamp led-test" in chinese
+    assert "ailamp vision-demo" in english
+    assert "ailamp vision-demo" in chinese
+    assert "ailamp agent" in english
+    assert "ailamp agent" in chinese
 
 
 def test_simulation_docs_list_adapter_visuals():
@@ -67,3 +72,41 @@ def test_simulation_docs_list_adapter_visuals():
 
     for visual_name in ADAPTER_VISUAL_NAMES:
         assert visual_name in docs_text
+
+
+def test_adapter_docs_do_not_reintroduce_destructive_original_part_edits():
+    root = Path(__file__).resolve().parents[1]
+    docs_text = "\n".join(
+        path.read_text()
+        for path in [
+            root / "docs/en/1-3d-print.md",
+            root / "docs/en/3-assembly.md",
+            root / "docs/zh/1-3D打印.md",
+            root / "docs/zh/3-装配.md",
+        ]
+    )
+
+    forbidden_phrases = [
+        "Add an Arducam UB0234 opening in `LampHead.3mf`",
+        "cut `LampBase.3mf`",
+        "cut `LampHead.3mf`",
+        "drill `LampBase.3mf`",
+        "drill `LampHead.3mf`",
+        "modify original `.3mf`",
+        "切割 `LampBase.3mf`",
+        "切割 `LampHead.3mf`",
+        "钻孔 `LampBase.3mf`",
+        "钻孔 `LampHead.3mf`",
+        "修改原始 `.3mf`",
+    ]
+    allowed_phrases = {
+        "Do not cut `LampHead.3mf`",
+        "不要切割 `LampHead.3mf`",
+    }
+
+    safe_text = docs_text
+    for phrase in allowed_phrases:
+        safe_text = safe_text.replace(phrase, "")
+
+    for phrase in forbidden_phrases:
+        assert phrase not in safe_text

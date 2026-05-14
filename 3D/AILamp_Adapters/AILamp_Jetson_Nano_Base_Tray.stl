@@ -99,72 +99,72 @@ solid AILamp_Jetson_Nano_Base_Tray
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex -61.0000 47.0000 10.0000
-      vertex 61.0000 47.0000 10.0000
-      vertex 61.0000 51.0000 10.0000
+      vertex -61.0000 47.0000 12.0000
+      vertex 61.0000 47.0000 12.0000
+      vertex 61.0000 51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex -61.0000 47.0000 10.0000
-      vertex 61.0000 51.0000 10.0000
-      vertex -61.0000 51.0000 10.0000
+      vertex -61.0000 47.0000 12.0000
+      vertex 61.0000 51.0000 12.0000
+      vertex -61.0000 51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -61.0000 47.0000 3.0000
       vertex 61.0000 47.0000 3.0000
-      vertex 61.0000 47.0000 10.0000
+      vertex 61.0000 47.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -61.0000 47.0000 3.0000
-      vertex 61.0000 47.0000 10.0000
-      vertex -61.0000 47.0000 10.0000
+      vertex 61.0000 47.0000 12.0000
+      vertex -61.0000 47.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 61.0000 47.0000 3.0000
       vertex 61.0000 51.0000 3.0000
-      vertex 61.0000 51.0000 10.0000
+      vertex 61.0000 51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 61.0000 47.0000 3.0000
-      vertex 61.0000 51.0000 10.0000
-      vertex 61.0000 47.0000 10.0000
+      vertex 61.0000 51.0000 12.0000
+      vertex 61.0000 47.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 61.0000 51.0000 3.0000
       vertex -61.0000 51.0000 3.0000
-      vertex -61.0000 51.0000 10.0000
+      vertex -61.0000 51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 61.0000 51.0000 3.0000
-      vertex -61.0000 51.0000 10.0000
-      vertex 61.0000 51.0000 10.0000
+      vertex -61.0000 51.0000 12.0000
+      vertex 61.0000 51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -61.0000 51.0000 3.0000
       vertex -61.0000 47.0000 3.0000
-      vertex -61.0000 47.0000 10.0000
+      vertex -61.0000 47.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -61.0000 51.0000 3.0000
-      vertex -61.0000 47.0000 10.0000
-      vertex -61.0000 51.0000 10.0000
+      vertex -61.0000 47.0000 12.0000
+      vertex -61.0000 51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
@@ -183,72 +183,72 @@ solid AILamp_Jetson_Nano_Base_Tray
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex -61.0000 -51.0000 10.0000
-      vertex 61.0000 -51.0000 10.0000
-      vertex 61.0000 -47.0000 10.0000
+      vertex -61.0000 -51.0000 12.0000
+      vertex 61.0000 -51.0000 12.0000
+      vertex 61.0000 -47.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex -61.0000 -51.0000 10.0000
-      vertex 61.0000 -47.0000 10.0000
-      vertex -61.0000 -47.0000 10.0000
+      vertex -61.0000 -51.0000 12.0000
+      vertex 61.0000 -47.0000 12.0000
+      vertex -61.0000 -47.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -61.0000 -51.0000 3.0000
       vertex 61.0000 -51.0000 3.0000
-      vertex 61.0000 -51.0000 10.0000
+      vertex 61.0000 -51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -61.0000 -51.0000 3.0000
-      vertex 61.0000 -51.0000 10.0000
-      vertex -61.0000 -51.0000 10.0000
+      vertex 61.0000 -51.0000 12.0000
+      vertex -61.0000 -51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 61.0000 -51.0000 3.0000
       vertex 61.0000 -47.0000 3.0000
-      vertex 61.0000 -47.0000 10.0000
+      vertex 61.0000 -47.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 61.0000 -51.0000 3.0000
-      vertex 61.0000 -47.0000 10.0000
-      vertex 61.0000 -51.0000 10.0000
+      vertex 61.0000 -47.0000 12.0000
+      vertex 61.0000 -51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 61.0000 -47.0000 3.0000
       vertex -61.0000 -47.0000 3.0000
-      vertex -61.0000 -47.0000 10.0000
+      vertex -61.0000 -47.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 61.0000 -47.0000 3.0000
-      vertex -61.0000 -47.0000 10.0000
-      vertex 61.0000 -47.0000 10.0000
+      vertex -61.0000 -47.0000 12.0000
+      vertex 61.0000 -47.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -61.0000 -47.0000 3.0000
       vertex -61.0000 -51.0000 3.0000
-      vertex -61.0000 -51.0000 10.0000
+      vertex -61.0000 -51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -61.0000 -47.0000 3.0000
-      vertex -61.0000 -51.0000 10.0000
-      vertex -61.0000 -47.0000 10.0000
+      vertex -61.0000 -51.0000 12.0000
+      vertex -61.0000 -47.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
@@ -267,72 +267,72 @@ solid AILamp_Jetson_Nano_Base_Tray
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex -61.0000 -51.0000 10.0000
-      vertex -57.0000 -51.0000 10.0000
-      vertex -57.0000 51.0000 10.0000
+      vertex -61.0000 -51.0000 12.0000
+      vertex -57.0000 -51.0000 12.0000
+      vertex -57.0000 51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex -61.0000 -51.0000 10.0000
-      vertex -57.0000 51.0000 10.0000
-      vertex -61.0000 51.0000 10.0000
+      vertex -61.0000 -51.0000 12.0000
+      vertex -57.0000 51.0000 12.0000
+      vertex -61.0000 51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -61.0000 -51.0000 3.0000
       vertex -57.0000 -51.0000 3.0000
-      vertex -57.0000 -51.0000 10.0000
+      vertex -57.0000 -51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -61.0000 -51.0000 3.0000
-      vertex -57.0000 -51.0000 10.0000
-      vertex -61.0000 -51.0000 10.0000
+      vertex -57.0000 -51.0000 12.0000
+      vertex -61.0000 -51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -57.0000 -51.0000 3.0000
       vertex -57.0000 51.0000 3.0000
-      vertex -57.0000 51.0000 10.0000
+      vertex -57.0000 51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -57.0000 -51.0000 3.0000
-      vertex -57.0000 51.0000 10.0000
-      vertex -57.0000 -51.0000 10.0000
+      vertex -57.0000 51.0000 12.0000
+      vertex -57.0000 -51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -57.0000 51.0000 3.0000
       vertex -61.0000 51.0000 3.0000
-      vertex -61.0000 51.0000 10.0000
+      vertex -61.0000 51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -57.0000 51.0000 3.0000
-      vertex -61.0000 51.0000 10.0000
-      vertex -57.0000 51.0000 10.0000
+      vertex -61.0000 51.0000 12.0000
+      vertex -57.0000 51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -61.0000 51.0000 3.0000
       vertex -61.0000 -51.0000 3.0000
-      vertex -61.0000 -51.0000 10.0000
+      vertex -61.0000 -51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -61.0000 51.0000 3.0000
-      vertex -61.0000 -51.0000 10.0000
-      vertex -61.0000 51.0000 10.0000
+      vertex -61.0000 -51.0000 12.0000
+      vertex -61.0000 51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
@@ -351,72 +351,72 @@ solid AILamp_Jetson_Nano_Base_Tray
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 57.0000 -51.0000 10.0000
-      vertex 61.0000 -51.0000 10.0000
-      vertex 61.0000 51.0000 10.0000
+      vertex 57.0000 -51.0000 12.0000
+      vertex 61.0000 -51.0000 12.0000
+      vertex 61.0000 51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 57.0000 -51.0000 10.0000
-      vertex 61.0000 51.0000 10.0000
-      vertex 57.0000 51.0000 10.0000
+      vertex 57.0000 -51.0000 12.0000
+      vertex 61.0000 51.0000 12.0000
+      vertex 57.0000 51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 57.0000 -51.0000 3.0000
       vertex 61.0000 -51.0000 3.0000
-      vertex 61.0000 -51.0000 10.0000
+      vertex 61.0000 -51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 57.0000 -51.0000 3.0000
-      vertex 61.0000 -51.0000 10.0000
-      vertex 57.0000 -51.0000 10.0000
+      vertex 61.0000 -51.0000 12.0000
+      vertex 57.0000 -51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 61.0000 -51.0000 3.0000
       vertex 61.0000 51.0000 3.0000
-      vertex 61.0000 51.0000 10.0000
+      vertex 61.0000 51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 61.0000 -51.0000 3.0000
-      vertex 61.0000 51.0000 10.0000
-      vertex 61.0000 -51.0000 10.0000
+      vertex 61.0000 51.0000 12.0000
+      vertex 61.0000 -51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 61.0000 51.0000 3.0000
       vertex 57.0000 51.0000 3.0000
-      vertex 57.0000 51.0000 10.0000
+      vertex 57.0000 51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 61.0000 51.0000 3.0000
-      vertex 57.0000 51.0000 10.0000
-      vertex 61.0000 51.0000 10.0000
+      vertex 57.0000 51.0000 12.0000
+      vertex 61.0000 51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 57.0000 51.0000 3.0000
       vertex 57.0000 -51.0000 3.0000
-      vertex 57.0000 -51.0000 10.0000
+      vertex 57.0000 -51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 57.0000 51.0000 3.0000
-      vertex 57.0000 -51.0000 10.0000
-      vertex 57.0000 51.0000 10.0000
+      vertex 57.0000 -51.0000 12.0000
+      vertex 57.0000 51.0000 12.0000
     endloop
   endfacet
   facet normal 0 0 0

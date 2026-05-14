@@ -3711,72 +3711,72 @@ solid AILamp_Head_Camera_Mount
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex -24.0000 18.0000 8.0000
-      vertex 24.0000 18.0000 8.0000
-      vertex 24.0000 21.0000 8.0000
+      vertex -24.0000 18.0000 10.0000
+      vertex 24.0000 18.0000 10.0000
+      vertex 24.0000 21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex -24.0000 18.0000 8.0000
-      vertex 24.0000 21.0000 8.0000
-      vertex -24.0000 21.0000 8.0000
+      vertex -24.0000 18.0000 10.0000
+      vertex 24.0000 21.0000 10.0000
+      vertex -24.0000 21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -24.0000 18.0000 3.0000
       vertex 24.0000 18.0000 3.0000
-      vertex 24.0000 18.0000 8.0000
+      vertex 24.0000 18.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -24.0000 18.0000 3.0000
-      vertex 24.0000 18.0000 8.0000
-      vertex -24.0000 18.0000 8.0000
+      vertex 24.0000 18.0000 10.0000
+      vertex -24.0000 18.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 24.0000 18.0000 3.0000
       vertex 24.0000 21.0000 3.0000
-      vertex 24.0000 21.0000 8.0000
+      vertex 24.0000 21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 24.0000 18.0000 3.0000
-      vertex 24.0000 21.0000 8.0000
-      vertex 24.0000 18.0000 8.0000
+      vertex 24.0000 21.0000 10.0000
+      vertex 24.0000 18.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 24.0000 21.0000 3.0000
       vertex -24.0000 21.0000 3.0000
-      vertex -24.0000 21.0000 8.0000
+      vertex -24.0000 21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 24.0000 21.0000 3.0000
-      vertex -24.0000 21.0000 8.0000
-      vertex 24.0000 21.0000 8.0000
+      vertex -24.0000 21.0000 10.0000
+      vertex 24.0000 21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -24.0000 21.0000 3.0000
       vertex -24.0000 18.0000 3.0000
-      vertex -24.0000 18.0000 8.0000
+      vertex -24.0000 18.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -24.0000 21.0000 3.0000
-      vertex -24.0000 18.0000 8.0000
-      vertex -24.0000 21.0000 8.0000
+      vertex -24.0000 18.0000 10.0000
+      vertex -24.0000 21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
@@ -3795,72 +3795,72 @@ solid AILamp_Head_Camera_Mount
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex -24.0000 -21.0000 8.0000
-      vertex 24.0000 -21.0000 8.0000
-      vertex 24.0000 -18.0000 8.0000
+      vertex -24.0000 -21.0000 10.0000
+      vertex 24.0000 -21.0000 10.0000
+      vertex 24.0000 -18.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex -24.0000 -21.0000 8.0000
-      vertex 24.0000 -18.0000 8.0000
-      vertex -24.0000 -18.0000 8.0000
+      vertex -24.0000 -21.0000 10.0000
+      vertex 24.0000 -18.0000 10.0000
+      vertex -24.0000 -18.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -24.0000 -21.0000 3.0000
       vertex 24.0000 -21.0000 3.0000
-      vertex 24.0000 -21.0000 8.0000
+      vertex 24.0000 -21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -24.0000 -21.0000 3.0000
-      vertex 24.0000 -21.0000 8.0000
-      vertex -24.0000 -21.0000 8.0000
+      vertex 24.0000 -21.0000 10.0000
+      vertex -24.0000 -21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 24.0000 -21.0000 3.0000
       vertex 24.0000 -18.0000 3.0000
-      vertex 24.0000 -18.0000 8.0000
+      vertex 24.0000 -18.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 24.0000 -21.0000 3.0000
-      vertex 24.0000 -18.0000 8.0000
-      vertex 24.0000 -21.0000 8.0000
+      vertex 24.0000 -18.0000 10.0000
+      vertex 24.0000 -21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 24.0000 -18.0000 3.0000
       vertex -24.0000 -18.0000 3.0000
-      vertex -24.0000 -18.0000 8.0000
+      vertex -24.0000 -18.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 24.0000 -18.0000 3.0000
-      vertex -24.0000 -18.0000 8.0000
-      vertex 24.0000 -18.0000 8.0000
+      vertex -24.0000 -18.0000 10.0000
+      vertex 24.0000 -18.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -24.0000 -18.0000 3.0000
       vertex -24.0000 -21.0000 3.0000
-      vertex -24.0000 -21.0000 8.0000
+      vertex -24.0000 -21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -24.0000 -18.0000 3.0000
-      vertex -24.0000 -21.0000 8.0000
-      vertex -24.0000 -18.0000 8.0000
+      vertex -24.0000 -21.0000 10.0000
+      vertex -24.0000 -18.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
@@ -3879,72 +3879,72 @@ solid AILamp_Head_Camera_Mount
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex -24.0000 -21.0000 8.0000
-      vertex -21.0000 -21.0000 8.0000
-      vertex -21.0000 21.0000 8.0000
+      vertex -24.0000 -21.0000 10.0000
+      vertex -21.0000 -21.0000 10.0000
+      vertex -21.0000 21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex -24.0000 -21.0000 8.0000
-      vertex -21.0000 21.0000 8.0000
-      vertex -24.0000 21.0000 8.0000
+      vertex -24.0000 -21.0000 10.0000
+      vertex -21.0000 21.0000 10.0000
+      vertex -24.0000 21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -24.0000 -21.0000 3.0000
       vertex -21.0000 -21.0000 3.0000
-      vertex -21.0000 -21.0000 8.0000
+      vertex -21.0000 -21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -24.0000 -21.0000 3.0000
-      vertex -21.0000 -21.0000 8.0000
-      vertex -24.0000 -21.0000 8.0000
+      vertex -21.0000 -21.0000 10.0000
+      vertex -24.0000 -21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -21.0000 -21.0000 3.0000
       vertex -21.0000 21.0000 3.0000
-      vertex -21.0000 21.0000 8.0000
+      vertex -21.0000 21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -21.0000 -21.0000 3.0000
-      vertex -21.0000 21.0000 8.0000
-      vertex -21.0000 -21.0000 8.0000
+      vertex -21.0000 21.0000 10.0000
+      vertex -21.0000 -21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -21.0000 21.0000 3.0000
       vertex -24.0000 21.0000 3.0000
-      vertex -24.0000 21.0000 8.0000
+      vertex -24.0000 21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -21.0000 21.0000 3.0000
-      vertex -24.0000 21.0000 8.0000
-      vertex -21.0000 21.0000 8.0000
+      vertex -24.0000 21.0000 10.0000
+      vertex -21.0000 21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -24.0000 21.0000 3.0000
       vertex -24.0000 -21.0000 3.0000
-      vertex -24.0000 -21.0000 8.0000
+      vertex -24.0000 -21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex -24.0000 21.0000 3.0000
-      vertex -24.0000 -21.0000 8.0000
-      vertex -24.0000 21.0000 8.0000
+      vertex -24.0000 -21.0000 10.0000
+      vertex -24.0000 21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
@@ -3963,72 +3963,72 @@ solid AILamp_Head_Camera_Mount
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 21.0000 -21.0000 8.0000
-      vertex 24.0000 -21.0000 8.0000
-      vertex 24.0000 21.0000 8.0000
+      vertex 21.0000 -21.0000 10.0000
+      vertex 24.0000 -21.0000 10.0000
+      vertex 24.0000 21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
-      vertex 21.0000 -21.0000 8.0000
-      vertex 24.0000 21.0000 8.0000
-      vertex 21.0000 21.0000 8.0000
+      vertex 21.0000 -21.0000 10.0000
+      vertex 24.0000 21.0000 10.0000
+      vertex 21.0000 21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 21.0000 -21.0000 3.0000
       vertex 24.0000 -21.0000 3.0000
-      vertex 24.0000 -21.0000 8.0000
+      vertex 24.0000 -21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 21.0000 -21.0000 3.0000
-      vertex 24.0000 -21.0000 8.0000
-      vertex 21.0000 -21.0000 8.0000
+      vertex 24.0000 -21.0000 10.0000
+      vertex 21.0000 -21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 24.0000 -21.0000 3.0000
       vertex 24.0000 21.0000 3.0000
-      vertex 24.0000 21.0000 8.0000
+      vertex 24.0000 21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 24.0000 -21.0000 3.0000
-      vertex 24.0000 21.0000 8.0000
-      vertex 24.0000 -21.0000 8.0000
+      vertex 24.0000 21.0000 10.0000
+      vertex 24.0000 -21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 24.0000 21.0000 3.0000
       vertex 21.0000 21.0000 3.0000
-      vertex 21.0000 21.0000 8.0000
+      vertex 21.0000 21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 24.0000 21.0000 3.0000
-      vertex 21.0000 21.0000 8.0000
-      vertex 24.0000 21.0000 8.0000
+      vertex 21.0000 21.0000 10.0000
+      vertex 24.0000 21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 21.0000 21.0000 3.0000
       vertex 21.0000 -21.0000 3.0000
-      vertex 21.0000 -21.0000 8.0000
+      vertex 21.0000 -21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
     outer loop
       vertex 21.0000 21.0000 3.0000
-      vertex 21.0000 -21.0000 8.0000
-      vertex 21.0000 21.0000 8.0000
+      vertex 21.0000 -21.0000 10.0000
+      vertex 21.0000 21.0000 10.0000
     endloop
   endfacet
   facet normal 0 0 0
