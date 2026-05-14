@@ -1,11 +1,11 @@
 [system]
 project_name = "AILamp"
-platform = "jetson"
+platform = "jetson-nano"
 
 [controller]
-model = "NVIDIA Jetson Orin Nano Super Developer Kit"
-mpn = "945-13766-0000-000"
-storage = "Samsung 980 NVMe M.2 2280 500GB, MZ-V8V500B"
+model = "NVIDIA Jetson Nano Developer Kit 4GB"
+mpn = "945-13450-0000-100"
+storage = "Not used on basic Jetson Nano Developer Kit; boot from microSD"
 system_card = "SanDisk Ultra microSDXC 64GB UHS-I"
 
 [power]
@@ -42,15 +42,15 @@ device = 0
 device_path = "/dev/video0"
 width = 640
 height = 480
-fps = 30
+fps = 15
 pixel_format = "MJPG"
 
 [vision]
-backend = "local_yolo"
-model = "yolov8n.pt"
-pose_model = "yolov8n-pose.pt"
-pose_enabled = true
-api_enabled = false
+backend = "api_hybrid"
+model = "disabled-on-jetson-nano"
+pose_model = "disabled-on-jetson-nano"
+pose_enabled = false
+api_enabled = true
 api_model = "gpt-4.1-mini"
 api_interval_s = 1.0
 api_image_max_px = 512
@@ -95,12 +95,12 @@ recordings_dir = "ailamp_runtime/ailamp/recordings"
 lock_freejoint = true
 
 [hardware_bom.main_controller]
-part = "NVIDIA Jetson Orin Nano Super Developer Kit, MPN 945-13766-0000-000"
+part = "NVIDIA Jetson Nano Developer Kit 4GB, MPN 945-13450-0000-100"
 quantity = "1"
 
 [hardware_bom.storage]
-part = "Samsung 980 NVMe M.2 2280 500GB, MZ-V8V500B"
-quantity = "1"
+part = "Not used on basic Jetson Nano Developer Kit; boot from microSD"
+quantity = "0"
 
 [hardware_bom.system_card]
 part = "SanDisk Ultra microSDXC 64GB UHS-I"

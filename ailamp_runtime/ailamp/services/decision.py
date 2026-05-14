@@ -14,6 +14,7 @@ class AIDecision:
     rgb: tuple[int, int, int]
     reason: str
     joint_deltas: tuple[JointDeltaCommand, ...] = ()
+    semantic_reason: str = ""
 
 
 class DecisionService:
@@ -43,27 +44,34 @@ class DecisionService:
                 rgb=self._tracking_rgb(event),
                 joint_deltas=tracking,
                 reason=self._tracking_reason(event),
+                semantic_reason=event.semantic_reason,
             )
 
         action = self.behavior.decide(event)
-        return AIDecision(event=event, motion=action.motion, rgb=action.rgb, reason=f"behavior_map:{event.event_type.value}")
+        return AIDecision(
+            event=event,
+            motion=action.motion,
+            rgb=action.rgb,
+            reason=f"behavior_map:{event.event_type.value}",
+            semantic_reason=event.semantic_reason,
+        )
 
     def _voice_decision(self, event: VisionEvent, user_text: str | None) -> AIDecision | None:
         if not user_text:
             return None
         text = user_text.lower()
         if any(keyword in text for keyword in ("专注", "学习", "study", "focus")):
-            return AIDecision(event, "idle", (255, 235, 190), "voice:focus_mode")
+            return AIDecision(event, "idle", (255, 235, 190), "voice:focus_mode", semantic_reason=event.semantic_reason)
         if any(keyword in text for keyword in ("点头", "nod")):
-            return AIDecision(event, "nod", (255, 210, 130), "voice:nod")
+            return AIDecision(event, "nod", (255, 210, 130), "voice:nod", semantic_reason=event.semantic_reason)
         if any(keyword in text for keyword in ("害羞", "shy")):
-            return AIDecision(event, "shy", (255, 80, 120), "voice:shy")
+            return AIDecision(event, "shy", (255, 80, 120), "voice:shy", semantic_reason=event.semantic_reason)
         if any(keyword in text for keyword in ("休息", "待机", "idle", "rest")):
-            return AIDecision(event, "idle", (30, 30, 80), "voice:idle")
+            return AIDecision(event, "idle", (30, 30, 80), "voice:idle", semantic_reason=event.semantic_reason)
         if any(keyword in text for keyword in ("跟随", "看着我", "follow", "track")):
             tracking = self._tracking_deltas(event)
             if tracking:
-                return AIDecision(event, "track", self._tracking_rgb(event), "voice:track", tracking)
+                return AIDecision(event, "track", self._tracking_rgb(event), "voice:track", tracking, event.semantic_reason)
         return None
 
     def _tracking_deltas(self, event: VisionEvent) -> tuple[JointDeltaCommand, ...]:

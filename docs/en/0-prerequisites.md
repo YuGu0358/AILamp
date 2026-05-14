@@ -2,6 +2,8 @@
 
 ## Hardware BOM
 
+Default Orin Nano Super profile:
+
 | Subsystem | Exact part | Qty |
 | --- | --- | ---: |
 | Main controller | NVIDIA Jetson Orin Nano Super Developer Kit, MPN `945-13766-0000-000` | 1 |
@@ -30,6 +32,16 @@
 | Power wire | 22AWG black silicone wire | 2m |
 | Signal wire | 24AWG silicone wire | 2m |
 
+Jetson Nano 4GB API-hybrid profile changes:
+
+| Subsystem | Exact part | Qty |
+| --- | --- | ---: |
+| Main controller | NVIDIA Jetson Nano Developer Kit 4GB, MPN `945-13450-0000-100` | 1 |
+| Storage | Not used on the basic Jetson Nano Developer Kit; boot from microSD | 0 |
+| System card | SanDisk Ultra microSDXC 64GB UHS-I | 1 |
+
+All servo, LED, camera, audio, power, cable, connector, and wire items stay the same as the default BOM.
+
 ## Power Domains
 
 ```text
@@ -47,4 +59,3 @@ Jetson USB -> Pico WH control only
 /dev/video0  -> Arducam UB0234
 USB audio    -> ReSpeaker XVF3800
 ```
-

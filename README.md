@@ -14,9 +14,14 @@ AILamp keeps the same toolchain as the upstream LeLamp repository:
 
 Do not make Blender, Gazebo, Isaac Sim, SolidWorks, or Fusion 360 the primary project workflow unless the team explicitly changes this toolchain.
 
-## Fixed Hardware BOM
+## Hardware Profiles
 
-The full non-printed hardware BOM is the structured `[hardware_bom]` section in `config/hardware.toml`; `docs/en/0-prerequisites.md` mirrors it for purchasing. This includes Jetson, storage, ST3215 servos, Waveshare servo driver, both MEAN WELL power supplies, Pico WH, NeoMatrix, TXS0108E, Arducam UB0234, ReSpeaker XVF3800, Seeed 4 ohm 5W speaker, emergency switch, USB cables, servo extensions, DC barrel adapters, WAGO connectors, and wire.
+The full non-printed hardware BOM is the structured `[hardware_bom]` section in the active profile config. Use `config/hardware.toml` for Orin Nano Super and `config/hardware.jetson-nano.toml` for Jetson Nano 4GB. `docs/en/0-prerequisites.md` mirrors both profiles for purchasing. This includes Jetson, storage or microSD boot media, ST3215 servos, Waveshare servo driver, both MEAN WELL power supplies, Pico WH, NeoMatrix, TXS0108E, Arducam UB0234, ReSpeaker XVF3800, Seeed 4 ohm 5W speaker, emergency switch, USB cables, servo extensions, DC barrel adapters, WAGO connectors, and wire.
+
+Two controller profiles are provided:
+
+- `config/hardware.toml`: Orin Nano Super profile with local YOLO person/pose detection.
+- `config/hardware.jetson-nano.toml`: Jetson Nano 4GB API-hybrid profile. It keeps motor, LED, camera, and voice behavior but does not run MuJoCo, local YOLO pose, or local large models on the Nano.
 
 ## Project Layout
 
@@ -26,7 +31,8 @@ AILamp/
   simulation/                 MuJoCo MJCF model, STL assets, AILamp scene
   firmware/pico_led_controller/
   ailamp_runtime/ailamp/      Python runtime package
-  config/hardware.toml        Fixed hardware and runtime config
+  config/hardware.toml        Orin Nano Super hardware and runtime config
+  config/hardware.jetson-nano.toml
   docs/en/                    English build guide
   docs/zh/                    Chinese build guide
   tests/                      Local unit tests
@@ -46,6 +52,14 @@ For Jetson hardware:
 
 ```bash
 pip install -e ".[hardware,voice]"
+```
+
+For Jetson Nano 4GB API-hybrid mode:
+
+```bash
+pip install -e ".[nano]"
+export OPENAI_API_KEY=...
+ailamp --config config/hardware.jetson-nano.toml hardware-check
 ```
 
 For physical ST3215 playback and calibration, install the upstream LeLamp runtime beside AILamp:
@@ -82,10 +96,11 @@ ailamp vision-loop --with-outputs
 ailamp agent-tools-test --event person_close --apply
 ailamp agent-tools-test --event posture_studying --apply
 ailamp agent-tools-test --event person_right --offset 0.6 --request "看着我并跟随我" --apply
+ailamp --config config/hardware.jetson-nano.toml agent-tools-test --event person_right --offset 0.6 --request "看着我并跟随我" --apply
 ailamp agent
 ```
 
-`vision-loop` is the real camera-to-behavior bridge. It reads the Arducam UB0234 camera, runs YOLO person and pose detection, writes the current state to `outputs/vision_state.json`, and maps the event to a motion and LED color. Add `--with-outputs` only on the Jetson after motor and LED tests pass; that flag drives the ST3215 servos and Pico WH LED controller.
+`vision-loop` is the real camera-to-behavior bridge. With the Orin profile it reads the Arducam UB0234 camera, runs YOLO person and pose detection, writes the current state to `outputs/vision_state.json`, and maps the event to a motion and LED color. With the Jetson Nano profile it sends low-rate camera frames to OpenAI vision and reuses the latest semantic event between API calls. Add `--with-outputs` only on the Jetson after motor and LED tests pass; that flag drives the ST3215 servos and Pico WH LED controller.
 
 `ailamp agent` reads the same vision state file, so OpenAI/LiveKit tools can report the current vision state, suggest the matching motion/light response, or apply that response to the physical outputs.
 

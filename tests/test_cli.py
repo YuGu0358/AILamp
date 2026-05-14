@@ -4,6 +4,7 @@ from ailamp.cli import main
 
 
 CONFIG_PATH = str(Path(__file__).resolve().parents[1] / "config/hardware.toml")
+NANO_CONFIG_PATH = str(Path(__file__).resolve().parents[1] / "config/hardware.jetson-nano.toml")
 
 
 def test_cli_static_hardware_check_passes(capsys):
@@ -23,6 +24,17 @@ def test_cli_hardware_check_failures_only_is_empty(capsys):
 
     assert exit_code == 0
     assert output == ""
+
+
+def test_cli_static_hardware_check_passes_for_jetson_nano_profile(capsys):
+    exit_code = main(["--config", NANO_CONFIG_PATH, "hardware-check"])
+    output = capsys.readouterr().out
+
+    assert exit_code == 0
+    assert "PASS controller.model: NVIDIA Jetson Nano Developer Kit 4GB" in output
+    assert "PASS controller.mpn: 945-13450-0000-100" in output
+    assert "PASS camera.fps: 15" in output
+    assert "PASS vision.backend: api_hybrid" in output
 
 
 def test_cli_birthday_check_dry_run(capsys):
@@ -76,6 +88,42 @@ def test_cli_vision_loop_uses_runtime(monkeypatch, capsys):
         "project": "AILamp",
         "open_with_outputs": True,
         "run": (2, 0.0, True),
+        "closed": True,
+    }
+    assert "event=person_center" in output
+
+
+def test_cli_vision_demo_uses_runtime_for_api_hybrid(monkeypatch, capsys):
+    calls = {}
+
+    class FakeResult:
+        def format(self):
+            return "frame=0 event=person_center motion=nod applied=False"
+
+    class FakeRuntime:
+        def __init__(self, config):
+            calls["backend"] = config.vision.backend
+
+        def open(self, *, with_outputs=False):
+            calls["open_with_outputs"] = with_outputs
+
+        def step(self):
+            calls["stepped"] = True
+            return FakeResult()
+
+        def close(self):
+            calls["closed"] = True
+
+    monkeypatch.setattr("ailamp.cli.VisionRuntime", FakeRuntime)
+
+    exit_code = main(["--config", NANO_CONFIG_PATH, "vision-demo"])
+    output = capsys.readouterr().out
+
+    assert exit_code == 0
+    assert calls == {
+        "backend": "api_hybrid",
+        "open_with_outputs": False,
+        "stepped": True,
         "closed": True,
     }
     assert "event=person_center" in output

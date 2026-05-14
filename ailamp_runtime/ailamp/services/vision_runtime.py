@@ -11,6 +11,7 @@ from typing import Callable, Iterator
 from ailamp.config import HardwareConfig
 from ailamp.models import BehaviorAction, BoundingBox, VisionEvent, VisionEventType
 from ailamp.paths import resolve_project_path
+from ailamp.services.api_vision import APIVisionService
 from ailamp.services.behavior import BehaviorService
 from ailamp.services.camera import CameraService
 from ailamp.services.decision import AIDecision, DecisionService
@@ -68,6 +69,7 @@ def _decision_to_dict(decision: AIDecision | None) -> dict | None:
         "rgb": list(decision.rgb),
         "reason": decision.reason,
         "joint_deltas": _joint_deltas_to_dict(decision.joint_deltas),
+        "semantic_reason": decision.semantic_reason,
     }
 
 
@@ -89,6 +91,7 @@ class VisionSnapshot:
                 "bbox": _bbox_to_dict(self.event.bbox),
                 "normalized_offset": self.event.normalized_offset,
                 "area_ratio": self.event.area_ratio,
+                "semantic_reason": self.event.semantic_reason,
             },
             "action": {
                 "motion": self.action.motion,
@@ -107,6 +110,7 @@ class VisionSnapshot:
             bbox=_bbox_from_dict(event_raw.get("bbox")),
             normalized_offset=float(event_raw.get("normalized_offset", 0.0)),
             area_ratio=float(event_raw.get("area_ratio", 0.0)),
+            semantic_reason=str(event_raw.get("semantic_reason", "")),
         )
         action_raw = raw["action"]
         action = BehaviorAction(
@@ -124,6 +128,7 @@ class VisionSnapshot:
                 rgb=tuple(int(value) for value in decision_raw["rgb"]),
                 reason=str(decision_raw.get("reason", "")),
                 joint_deltas=_joint_deltas_from_dict(decision_raw.get("joint_deltas")),
+                semantic_reason=str(decision_raw.get("semantic_reason", "")),
             )
         return cls(
             event=event,
@@ -186,9 +191,11 @@ class VisionRuntime:
         led_service: object | None = None,
         motor_service: object | None = None,
         pose_detector: object | None = None,
+        api_vision: object | None = None,
         clock: Callable[[], float] = time.monotonic,
     ):
         self.config = config
+        self.backend = config.vision.backend
         self.camera = camera or CameraService(
             config.camera.device_path,
             config.camera.width,
@@ -196,10 +203,21 @@ class VisionRuntime:
             config.camera.fps,
             config.camera.pixel_format,
         )
-        self.detector = detector or DetectorService(config.vision.model, config.vision.confidence)
+        self.detector = detector or (None if self.backend == "api_hybrid" else DetectorService(config.vision.model, config.vision.confidence))
         self.pose_detector = pose_detector
-        if self.pose_detector is None and detector is None and config.vision.pose_enabled:
+        if self.pose_detector is None and detector is None and self.backend != "api_hybrid" and config.vision.pose_enabled:
             self.pose_detector = PoseDetectorService(config.vision.pose_model, config.vision.confidence)
+        self.api_vision = api_vision
+        if self.api_vision is None and self.backend == "api_hybrid":
+            self.api_vision = APIVisionService(
+                model=config.vision.api_model,
+                interval_s=config.vision.api_interval_s,
+                confidence_threshold=config.vision.confidence,
+                image_max_px=config.vision.api_image_max_px,
+                timeout_s=config.vision.api_timeout_s,
+                event_ttl_s=config.vision.api_event_ttl_s,
+                clock=clock,
+            )
         self.behavior = behavior or BehaviorService()
         self.decision_service = decision_service or DecisionService(behavior=self.behavior)
         self.state_store = state_store or VisionStateStore(config.runtime.vision_state_file)
@@ -213,8 +231,13 @@ class VisionRuntime:
 
     def open(self, *, with_outputs: bool = False) -> None:
         self.camera.open()
-        self.detector.load()
-        if self.pose_detector is not None:
+        if self.backend == "api_hybrid":
+            if self.api_vision is None:
+                raise RuntimeError("api_hybrid backend is not configured")
+            self.api_vision.load()
+        elif self.detector is not None:
+            self.detector.load()
+        if self.backend != "api_hybrid" and self.pose_detector is not None:
             self.pose_detector.load()
         if with_outputs:
             if self.led_service is None:
@@ -241,19 +264,24 @@ class VisionRuntime:
 
     def step(self, *, apply_outputs: bool = False) -> VisionLoopResult:
         frame = self.camera.read()
-        bbox = self.detector.detect_person(frame) if frame is not None else None
-        base_event = classify_person_position(
-            bbox,
-            (self.config.camera.width, self.config.camera.height),
-            left_threshold=self.config.vision.left_threshold,
-            right_threshold=self.config.vision.right_threshold,
-            close_area_ratio=self.config.vision.close_area_ratio,
-            far_area_ratio=self.config.vision.far_area_ratio,
-        )
-        pose_event = None
-        if frame is not None and bbox is not None and self.pose_detector is not None:
-            pose_event = classify_pose_gesture(self.pose_detector.detect_pose(frame))
-        event = self._choose_event(base_event, pose_event)
+        if self.backend == "api_hybrid":
+            if self.api_vision is None:
+                raise RuntimeError("api_hybrid backend is not configured")
+            event = self._choose_event(self.api_vision.detect_event(frame), None)
+        else:
+            bbox = self.detector.detect_person(frame) if frame is not None and self.detector is not None else None
+            base_event = classify_person_position(
+                bbox,
+                (self.config.camera.width, self.config.camera.height),
+                left_threshold=self.config.vision.left_threshold,
+                right_threshold=self.config.vision.right_threshold,
+                close_area_ratio=self.config.vision.close_area_ratio,
+                far_area_ratio=self.config.vision.far_area_ratio,
+            )
+            pose_event = None
+            if frame is not None and bbox is not None and self.pose_detector is not None:
+                pose_event = classify_pose_gesture(self.pose_detector.detect_pose(frame))
+            event = self._choose_event(base_event, pose_event)
         decision = self.decision_service.decide(event)
         action = BehaviorAction(event=event, motion=decision.motion, rgb=decision.rgb)
         snapshot = VisionSnapshot(event=event, action=action, updated_at=_utc_now(), frame_index=self._frame_index, decision=decision)
@@ -264,9 +292,12 @@ class VisionRuntime:
 
     def _choose_event(self, base_event: VisionEvent, pose_event: VisionEvent | None) -> VisionEvent:
         if base_event.event_type == VisionEventType.NO_PERSON:
+            if base_event.semantic_reason.startswith(("api_error:", "no_frame")):
+                self._last_seen_person = False
+                return base_event
             if self._last_seen_person:
                 self._last_seen_person = False
-                return VisionEvent(VisionEventType.PERSON_LEFT_SEAT)
+                return VisionEvent(VisionEventType.PERSON_LEFT_SEAT, semantic_reason=base_event.semantic_reason)
             return base_event
 
         self._last_seen_person = True

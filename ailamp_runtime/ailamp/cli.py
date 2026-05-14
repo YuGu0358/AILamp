@@ -181,6 +181,15 @@ def birthday_check(args) -> int:
 
 def vision_demo(args) -> int:
     config = _config(args)
+    if config.vision.backend == "api_hybrid":
+        runtime = VisionRuntime(config)
+        try:
+            runtime.open(with_outputs=False)
+            print(runtime.step().format())
+        finally:
+            runtime.close()
+        return 0
+
     from ailamp.services.camera import CameraService
     from ailamp.services.vision import DetectorService
 

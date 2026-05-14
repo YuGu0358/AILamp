@@ -10,6 +10,7 @@ from ailamp.services.vision_runtime import VisionRuntime, VisionSnapshot, Vision
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = PROJECT_ROOT / "config/hardware.toml"
+NANO_CONFIG_PATH = PROJECT_ROOT / "config/hardware.jetson-nano.toml"
 
 
 class FakeCamera:
@@ -57,6 +58,20 @@ class FakePoseDetector:
         return self.poses.pop(0)
 
 
+class FakeAPIVision:
+    def __init__(self, events):
+        self.events = list(events)
+        self.loaded = False
+
+    def load(self):
+        self.loaded = True
+
+    def detect_event(self, frame):
+        if not self.events:
+            return VisionEvent(VisionEventType.NO_PERSON)
+        return self.events.pop(0)
+
+
 class FakeLed:
     def __init__(self):
         self.colors = []
@@ -93,6 +108,10 @@ class FakeMotor:
 
 def config():
     return load_hardware_config(CONFIG_PATH)
+
+
+def nano_config():
+    return load_hardware_config(NANO_CONFIG_PATH)
 
 
 def test_vision_runtime_writes_state_and_maps_action(tmp_path, monkeypatch):
@@ -185,6 +204,48 @@ def test_vision_runtime_turns_departure_into_idle(tmp_path, monkeypatch):
 
     assert result.snapshot.event.event_type == VisionEventType.PERSON_LEFT_SEAT
     assert result.snapshot.action.motion == "idle"
+
+
+def test_vision_runtime_uses_api_hybrid_backend_without_local_yolo(tmp_path, monkeypatch):
+    monkeypatch.setenv("AILAMP_PROJECT_ROOT", str(tmp_path))
+    api = FakeAPIVision([VisionEvent(VisionEventType.POSTURE_STUDYING, confidence=0.86)])
+    detector = FakeDetector([BoundingBox(20, 120, 100, 220, 0.9)])
+    runtime = VisionRuntime(
+        nano_config(),
+        camera=FakeCamera([b"jpeg"]),
+        detector=detector,
+        api_vision=api,
+    )
+
+    runtime.open()
+    result = runtime.step()
+
+    assert api.loaded
+    assert detector.loaded is False
+    assert result.snapshot.event.event_type == VisionEventType.POSTURE_STUDYING
+    assert result.snapshot.action.motion == "idle"
+    assert result.snapshot.action.rgb == (255, 235, 190)
+
+
+def test_vision_runtime_does_not_convert_api_error_to_left_seat(tmp_path, monkeypatch):
+    monkeypatch.setenv("AILAMP_PROJECT_ROOT", str(tmp_path))
+    api = FakeAPIVision(
+        [
+            VisionEvent(VisionEventType.PERSON_CENTER, confidence=0.86),
+            VisionEvent(VisionEventType.NO_PERSON, semantic_reason="api_error:network down"),
+        ]
+    )
+    runtime = VisionRuntime(
+        nano_config(),
+        camera=FakeCamera([b"jpeg", b"jpeg"]),
+        api_vision=api,
+    )
+
+    assert runtime.step().snapshot.event.event_type == VisionEventType.PERSON_CENTER
+    result = runtime.step()
+
+    assert result.snapshot.event.event_type == VisionEventType.NO_PERSON
+    assert result.snapshot.event.semantic_reason == "api_error:network down"
 
 
 def test_agent_toolbox_reads_shared_vision_state(tmp_path, monkeypatch):

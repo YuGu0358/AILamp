@@ -75,9 +75,16 @@ class CameraConfig:
 
 @dataclass(frozen=True)
 class VisionConfig:
+    backend: str
     model: str
     pose_model: str
     pose_enabled: bool
+    api_enabled: bool
+    api_model: str
+    api_interval_s: float
+    api_image_max_px: int
+    api_timeout_s: float
+    api_event_ttl_s: float
     confidence: float
     left_threshold: float
     right_threshold: float
@@ -157,6 +164,16 @@ def load_hardware_config(path: str | Path) -> HardwareConfig:
         raw: dict[str, Any] = tomllib.load(handle)
 
     birthday_raw = raw["birthday"]
+    vision_raw = {
+        "backend": "local_yolo",
+        "api_enabled": False,
+        "api_model": "gpt-4.1-mini",
+        "api_interval_s": 1.0,
+        "api_image_max_px": 512,
+        "api_timeout_s": 10.0,
+        "api_event_ttl_s": 2.0,
+    }
+    vision_raw.update(raw["vision"])
 
     return HardwareConfig(
         system=SystemConfig(**raw["system"]),
@@ -165,7 +182,7 @@ def load_hardware_config(path: str | Path) -> HardwareConfig:
         motors=MotorConfig(**raw["motors"]),
         led=LEDConfig(**raw["led"]),
         camera=CameraConfig(**raw["camera"]),
-        vision=VisionConfig(**raw["vision"]),
+        vision=VisionConfig(**vision_raw),
         audio=AudioConfig(**raw["audio"]),
         voice=VoiceConfig(**raw["voice"]),
         runtime=RuntimeConfig(**raw["runtime"]),

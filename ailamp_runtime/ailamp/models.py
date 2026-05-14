@@ -19,6 +19,9 @@ class VisionEventType(StrEnum):
     GESTURE_DOWN = "gesture_down"
     POSTURE_STUDYING = "posture_studying"
     LOOKING_AT_LAMP = "looking_at_lamp"
+    EXPRESSION_SMILE = "expression_smile"
+    EXPRESSION_TIRED = "expression_tired"
+    EXPRESSION_NEUTRAL = "expression_neutral"
 
 
 @dataclass(frozen=True)
@@ -46,6 +49,7 @@ class VisionEvent:
     bbox: Optional[BoundingBox] = None
     normalized_offset: float = 0.0
     area_ratio: float = 0.0
+    semantic_reason: str = ""
 
 
 @dataclass(frozen=True)
