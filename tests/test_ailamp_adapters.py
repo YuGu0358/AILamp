@@ -65,12 +65,7 @@ def test_adapter_specs_use_loose_fit_clearances():
 
 def test_generator_writes_all_adapter_files_without_touching_originals(tmp_path):
     generator = load_generator()
-    original_hashes = {path: sha256(path) for path in ORIGINAL_PRINT_FILES}
-    output_dir = tmp_path / "adapters"
-
-    generator.generate_all(output_dir)
-
-    adapter_names = [
+    expected_adapter_names = {
         "AILamp_Jetson_Nano_Base_Tray",
         "AILamp_Electronics_Side_Deck",
         "AILamp_Head_Camera_Mount",
@@ -78,8 +73,30 @@ def test_generator_writes_all_adapter_files_without_touching_originals(tmp_path)
         "AILamp_ReSpeaker_External_Mount",
         "AILamp_Cable_Clip_6mm",
         "AILamp_Cable_Clip_10mm",
-    ]
-    for adapter_name in adapter_names:
+    }
+    specs = {spec.name: spec for spec in generator.adapter_specs()}
+    assert set(specs) == expected_adapter_names
+
+    original_hashes = {path: sha256(path) for path in ORIGINAL_PRINT_FILES}
+    original_bytes = {path: path.read_bytes() for path in ORIGINAL_PRINT_FILES}
+    output_dir = tmp_path / "adapters"
+    mutated_originals = []
+
+    try:
+        generator.generate_all(output_dir)
+    finally:
+        for path, snapshot in original_bytes.items():
+            current_bytes = path.read_bytes() if path.exists() else None
+            if current_bytes != snapshot:
+                mutated_originals.append(path)
+                path.write_bytes(snapshot)
+
+    assert not mutated_originals, (
+        "generate_all mutated original print files: "
+        + ", ".join(str(path) for path in mutated_originals)
+    )
+
+    for adapter_name in sorted(specs):
         for suffix in (".3mf", ".stl"):
             output_file = output_dir / f"{adapter_name}{suffix}"
             assert output_file.is_file()
