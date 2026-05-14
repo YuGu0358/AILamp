@@ -26,9 +26,18 @@ Do not switch the primary mechanical workflow to Blender, SolidWorks, Fusion 360
 | `LampHead.3mf` | 1 |
 | `LampHead - Diffuser.3mf` | 1 |
 
-## AILamp Mechanical Changes
+## AILamp Adapter Kit
 
-- Add an Arducam UB0234 opening in `LampHead.3mf`.
-- Add a camera bracket and strain relief for the short USB cable.
-- Reserve base routing for the Waveshare servo driver, Pico WH, DC barrel terminals, and WAGO 221-413 connectors.
-- Use an external or lower-layer Jetson mounting plate if the stock base cannot contain the Jetson and cooling stack.
+AILamp v1 preserves the original seven LeLamp `.3mf` files. The Jetson Nano 4GB hardware profile uses reversible adapter parts in `3D/AILamp_Adapters/` instead of cutting into the original base or lamp head.
+
+| Adapter file | Qty | Purpose |
+| --- | ---: | --- |
+| `AILamp_Jetson_Nano_Base_Tray.3mf` | 1 | External loose-fit tray for the Jetson Nano 4GB developer kit |
+| `AILamp_Electronics_Side_Deck.3mf` | 1 | Mounts the Waveshare ST3215 driver and Raspberry Pi Pico WH |
+| `AILamp_Head_Camera_Mount.3mf` | 1 | Reversible Arducam UB0234 lamp-head camera mount |
+| `AILamp_NeoMatrix_Holder.3mf` | 1 | Holds the Adafruit NeoMatrix behind the diffuser |
+| `AILamp_ReSpeaker_External_Mount.3mf` | 1 | External ReSpeaker XVF3800 mount |
+| `AILamp_Cable_Clip_6mm.3mf` | 2-4 | USB and signal cable routing |
+| `AILamp_Cable_Clip_10mm.3mf` | 2-4 | Power and servo cable routing |
+
+Fit rule: print the first adapter pass slightly loose. PCB pockets include 1.5 mm clearance per side, cable exits include at least 2.5 mm extra width, and retention should use screws, zip ties, or removable straps rather than hard snap-fit pressure.
