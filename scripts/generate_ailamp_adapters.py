@@ -330,8 +330,9 @@ def build_cable_clip(channel_width_mm: float, outer_mm: tuple[float, float, floa
     return mesh
 
 
-def generate_all(output_dir: Path = Path("3D/AILamp_Adapters")) -> list[Path]:
-    output_dir.mkdir(parents=True, exist_ok=True)
+def generate_all(output_dir: Path | str = Path("3D/AILamp_Adapters")) -> list[Path]:
+    output = Path(output_dir)
+    output.mkdir(parents=True, exist_ok=True)
     builders = {
         "AILamp_Jetson_Nano_Base_Tray": build_jetson_tray,
         "AILamp_Electronics_Side_Deck": build_electronics_side_deck,
@@ -344,8 +345,8 @@ def generate_all(output_dir: Path = Path("3D/AILamp_Adapters")) -> list[Path]:
     written: list[Path] = []
     for spec in adapter_specs():
         mesh = builders[spec.name]()
-        stl_path = output_dir / f"{spec.name}.stl"
-        model_path = output_dir / f"{spec.name}.3mf"
+        stl_path = output / f"{spec.name}.stl"
+        model_path = output / f"{spec.name}.3mf"
         mesh.write_3mf(model_path)
         mesh.write_stl(stl_path)
         written.extend([model_path, stl_path])
