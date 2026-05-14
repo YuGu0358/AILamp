@@ -1,5 +1,6 @@
 import math
 from pathlib import Path
+import xml.etree.ElementTree as ET
 
 import pytest
 
@@ -46,7 +47,12 @@ def test_virtual_vision_can_use_target_slide_joints():
 
 def test_ailamp_adapter_visuals_are_present_in_scene():
     root = Path(__file__).resolve().parents[1]
-    scene = (root / "simulation/ailamp_scene.xml").read_text()
+    scene = ET.parse(root / "simulation/ailamp_scene.xml").getroot()
+    geoms = {
+        geom.attrib["name"]: geom.attrib
+        for geom in scene.findall(".//geom")
+        if "name" in geom.attrib
+    }
 
     for name in [
         "ailamp_jetson_tray_visual",
@@ -55,4 +61,6 @@ def test_ailamp_adapter_visuals_are_present_in_scene():
         "ailamp_neomatrix_visual",
         "ailamp_respeaker_visual",
     ]:
-        assert name in scene
+        assert geoms[name]["type"] == "box"
+        assert geoms[name]["contype"] == "0"
+        assert geoms[name]["conaffinity"] == "0"

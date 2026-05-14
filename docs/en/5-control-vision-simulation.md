@@ -16,7 +16,19 @@ AILamp keeps the upstream LeLamp simulation workflow:
 - Reference URDF: `simulation/robot.urdf`.
 - Mesh assets: `simulation/assets/*.stl`.
 
-`simulation/ailamp_scene.xml` includes the LeLamp robot, a virtual person target, and a simulation camera.
+`simulation/ailamp_scene.xml` includes the LeLamp robot, a virtual person target, a simulation camera, and simplified AILamp hardware adapter visuals.
+
+Adapter visuals in the scene:
+
+```text
+ailamp_jetson_tray_visual -> Jetson Nano base tray
+ailamp_electronics_deck_visual -> Waveshare ST3215 driver + Pico WH side deck
+ailamp_camera_mount_visual -> Arducam UB0234 head camera bracket
+ailamp_neomatrix_visual -> NeoMatrix holder behind diffuser
+ailamp_respeaker_visual -> ReSpeaker XVF3800 external mount
+```
+
+These geoms are visual-only placement references. They do not change the LeLamp servo kinematic chain or actuator mapping.
 
 ## Vision Events
 
@@ -34,6 +46,9 @@ gesture_up -> curious -> RGB(180, 220, 255)
 gesture_down -> idle -> RGB(180, 220, 255)
 posture_studying -> idle -> RGB(255, 235, 190)
 looking_at_lamp -> nod -> RGB(255, 210, 130)
+expression_smile -> happy_wiggle -> RGB(255, 210, 130)
+expression_tired -> idle -> RGB(255, 235, 190)
+expression_neutral -> idle -> RGB(180, 220, 255)
 ```
 
 ## Hardware Demo
@@ -53,13 +68,25 @@ ailamp agent
 
 `vision-demo` captures one frame and prints the detected event, motion, and LED color.
 
-`vision-loop` is the continuous runtime bridge:
+`vision-loop` is the continuous runtime bridge.
+
+Orin profile:
 
 ```text
-Arducam UB0234 -> YOLO nano + YOLO pose -> VisionEvent -> BehaviorService -> ST3215 + Pico LED
+Arducam UB0234 -> YOLO nano + YOLO pose -> VisionEvent -> DecisionService -> ST3215 + Pico LED
+```
+
+Jetson Nano API-hybrid profile:
+
+```text
+Arducam UB0234 -> low-rate OpenAI vision API -> VisionEvent -> DecisionService -> ST3215 + Pico LED
 ```
 
 By default it only prints results and writes `outputs/vision_state.json`. Use `--with-outputs` on the Jetson after `led-test` and `motor-test` pass.
+
+```bash
+ailamp --config config/hardware.jetson-nano.toml vision-loop --with-outputs
+```
 
 ## AI Decision Layer
 
