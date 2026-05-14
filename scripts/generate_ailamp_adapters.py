@@ -213,6 +213,36 @@ def _edge_rails(
     mesh.add_box(sx / 2.0 - rail_width / 2.0, 0.0, cz, rail_width, sy, rail_height)
 
 
+def _plate_with_square_cutouts(
+    mesh: Mesh,
+    outer_x: float,
+    outer_y: float,
+    thickness: float,
+    cutouts: tuple[tuple[float, float, float, float], ...],
+) -> None:
+    x_edges = {-outer_x / 2.0, outer_x / 2.0}
+    y_edges = {-outer_y / 2.0, outer_y / 2.0}
+    for cx, cy, sx, sy in cutouts:
+        x_edges.update((cx - sx / 2.0, cx + sx / 2.0))
+        y_edges.update((cy - sy / 2.0, cy + sy / 2.0))
+
+    sorted_x = sorted(x_edges)
+    sorted_y = sorted(y_edges)
+    for x0, x1 in zip(sorted_x, sorted_x[1:]):
+        for y0, y1 in zip(sorted_y, sorted_y[1:]):
+            if x1 <= x0 or y1 <= y0:
+                continue
+            cx = (x0 + x1) / 2.0
+            cy = (y0 + y1) / 2.0
+            inside_cutout = any(
+                abs(cx - cutout_x) < cutout_sx / 2.0
+                and abs(cy - cutout_y) < cutout_sy / 2.0
+                for cutout_x, cutout_y, cutout_sx, cutout_sy in cutouts
+            )
+            if not inside_cutout:
+                mesh.add_box(cx, cy, thickness / 2.0, x1 - x0, y1 - y0, thickness)
+
+
 def build_jetson_tray() -> Mesh:
     mesh = Mesh("AILamp_Jetson_Nano_Base_Tray")
     outer = (122.0, 102.0, 12.0)
@@ -243,13 +273,17 @@ def build_camera_mount() -> Mesh:
     mesh = Mesh("AILamp_Head_Camera_Mount")
     outer_x, outer_y, _ = (48.0, 42.0, 10.0)
     plate_thickness = 3.0
-    # Four plate quadrants leave a 16 x 16 mm central lens aperture.
-    mesh.add_box(0.0, 14.5, 1.5, outer_x, 13.0, plate_thickness)
-    mesh.add_box(0.0, -14.5, 1.5, outer_x, 13.0, plate_thickness)
-    mesh.add_box(-16.0, 0.0, 1.5, 16.0, 16.0, plate_thickness)
-    mesh.add_box(16.0, 0.0, 1.5, 16.0, 16.0, plate_thickness)
+    screw_clearance = 3.0 + SCREW_HOLE_EXTRA_DIAMETER_MM
+    cutouts = (
+        (0.0, 0.0, 16.0, 16.0),
+        (-14.0, -14.0, screw_clearance, screw_clearance),
+        (-14.0, 14.0, screw_clearance, screw_clearance),
+        (14.0, -14.0, screw_clearance, screw_clearance),
+        (14.0, 14.0, screw_clearance, screw_clearance),
+    )
+    _plate_with_square_cutouts(mesh, outer_x, outer_y, plate_thickness, cutouts)
     _edge_rails(mesh, (outer_x, outer_y, 10.0), 3.0, 5.0, 3.0)
-    # Small blocks around each nominal screw location leave square clearance gaps.
+    # Raised bosses stop short of each 3.4 x 3.4 mm through-gap.
     for x in (-14.0, 14.0):
         for y in (-14.0, 14.0):
             mesh.add_box(x - 3.5, y, 5.5, 2.0, 8.0, 3.0)
@@ -304,8 +338,8 @@ def generate_all(output_dir: Path = Path("3D/AILamp_Adapters")) -> list[Path]:
         "AILamp_Head_Camera_Mount": build_camera_mount,
         "AILamp_NeoMatrix_Holder": build_neomatrix_holder,
         "AILamp_ReSpeaker_External_Mount": build_respeaker_mount,
-        "AILamp_Cable_Clip_6mm": lambda: build_cable_clip(6.0, (24.0, 18.0, 8.0)),
-        "AILamp_Cable_Clip_10mm": lambda: build_cable_clip(10.0, (30.0, 22.0, 10.0)),
+        "AILamp_Cable_Clip_6mm": lambda: build_cable_clip(8.5, (24.0, 18.0, 8.0)),
+        "AILamp_Cable_Clip_10mm": lambda: build_cable_clip(12.5, (30.0, 22.0, 10.0)),
     }
     written: list[Path] = []
     for spec in adapter_specs():
