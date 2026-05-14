@@ -45,6 +45,20 @@ The adapter kit is designed around the selected Jetson Nano 4GB API-hybrid hardw
 - Seeed Studio ReSpeaker XVF3800 USB 4-Mic Array with Case, Product `6490`: 35 x 86 mm envelope.
 - Waveshare ST3215 Servo: 45.22 x 35 x 24.72 mm, already represented by the LeLamp-style servo joint layout and not redesigned in this adapter pass.
 
+## Clearance And Fit Rules
+
+The adapter kit must prioritize easy assembly over tight snap-fit geometry. Printed parts should locate boards without pinching them, and all PCB pockets, wire exits, and board retainers must include practical clearance:
+
+- PCB edge pockets: nominal hardware footprint plus 1.5 mm clearance per side.
+- Board retaining lips: hold the board vertically or laterally without pressing on components.
+- Mounting holes: use oversize clearance holes, at least 0.4 mm larger than the screw nominal diameter.
+- Cable exits: at least 2.5 mm extra width beyond the cable or connector bundle envelope.
+- Sliding or clip-on features: no hard press-fit requirement; use screws, zip ties, or removable straps for retention.
+- Camera lens aperture: at least 1.0 mm radial clearance around the M12 lens barrel.
+- NeoMatrix holder: leave an air gap behind the diffuser and avoid direct LED-to-diffuser pressure.
+
+The first print pass should be slightly loose. If later physical testing shows movement or vibration, retention should be improved with screws, pads, or zip ties rather than shrinking the board pockets too aggressively.
+
 ## Printable Outputs
 
 Add a new directory for AILamp-specific printable adapters:
@@ -120,7 +134,7 @@ Design-level checks:
 
 - All new adapter files are present under `3D/AILamp_Adapters/`.
 - The original seven LeLamp `.3mf` files are byte-for-byte untouched.
-- Hardware envelopes have at least 1.0 mm clearance around PCB edges and at least 2.0 mm clearance near cable exits.
+- Hardware envelopes follow the clearance rules: at least 1.5 mm around PCB edges, oversize screw holes, and at least 2.5 mm extra width at cable exits.
 - Camera mount exposes the M12 lens and does not block the diffuser.
 - NeoMatrix holder accepts a 71.17 mm square board envelope.
 - ReSpeaker mount does not share the speaker mounting surface.
