@@ -10,11 +10,13 @@ Copied source assets:
 
 The copied upstream project is licensed under GNU GPL v3. See `LICENSE`.
 
-AILamp modifies the upstream simulation by adding `simulation/ailamp_scene.xml`, which includes a virtual person target and simulation camera while retaining the original LeLamp MJCF assets for reference.
+AILamp modifies the upstream simulation by adding `simulation/ailamp_scene.xml`, which includes a virtual person target, simulation camera, and simplified visual geoms for the AILamp hardware adapter kit while retaining the original LeLamp MJCF assets for reference.
 
 AILamp-specific additions include:
 
 - Jetson Orin Nano Super hardware configuration
+- Jetson Nano 4GB API-hybrid hardware configuration
+- Generated AILamp adapter kit in `3D/AILamp_Adapters/`
 - Raspberry Pi Pico WH LED serial firmware
 - Arducam UB0234 camera integration
 - Seeed ReSpeaker XVF3800 audio integration

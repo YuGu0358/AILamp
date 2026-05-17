@@ -40,4 +40,6 @@ AILamp v1 preserves the original seven LeLamp `.3mf` files. The Jetson Nano 4GB 
 | `AILamp_Cable_Clip_6mm.3mf` | 2-4 | USB and signal cable routing |
 | `AILamp_Cable_Clip_10mm.3mf` | 2-4 | Power and servo cable routing |
 
+Each listed adapter `.3mf` has a matching `.stl` export with the same base name for slicer compatibility and visual checks.
+
 Fit rule: print the first adapter pass slightly loose. PCB pockets include 1.5 mm clearance per side, cable exits include at least 2.5 mm extra width, and retention should use screws, zip ties, or removable straps rather than hard snap-fit pressure.

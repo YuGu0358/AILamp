@@ -12,9 +12,13 @@ M12_LENS_RADIAL_CLEARANCE_MM = 1.0
 JETSON_BOARD_MM = (100.0, 80.0)
 PICO_BOARD_MM = (51.0, 21.0)
 SERVO_DRIVER_BOARD_MM = (65.0, 30.0)
+SERVO_DRIVER_MOUNT_HOLE_MM = (58.0, 23.0)
 NEOMATRIX_BOARD_MM = (71.17, 71.17)
 CAMERA_BOARD_MM = (32.0, 32.0)
 RESPEAKER_CASE_MM = (86.0, 35.0)
+PICO_USB_RELIEF_MM = (14.0, 10.0)
+LAMP_HEAD_STRAP_SLOT_MM = (34.0, 4.0)
+ZIP_TIE_SLOT_MM = (38.0, 4.0)
 
 
 CORE_NAMESPACE = "http://schemas.microsoft.com/3dmanufacturing/core/2015/02"
@@ -100,8 +104,8 @@ def adapter_specs() -> list[AdapterSpec]:
 class Mesh:
     def __init__(self, name: str) -> None:
         self.name = name
-        self.vertices: list[tuple[float, float, float]] = []
-        self.triangles: list[tuple[int, int, int]] = []
+        self._boxes: list[tuple[float, float, float, float, float, float]] = []
+        self._cutouts: list[tuple[float, float, float, float, float, float]] = []
 
     def add_box(
         self,
@@ -112,53 +116,31 @@ class Mesh:
         sy: float,
         sz: float,
     ) -> None:
-        x0 = cx - sx / 2.0
-        x1 = cx + sx / 2.0
-        y0 = cy - sy / 2.0
-        y1 = cy + sy / 2.0
-        z0 = cz - sz / 2.0
-        z1 = cz + sz / 2.0
-        first = len(self.vertices)
-        self.vertices.extend(
-            [
-                (x0, y0, z0),
-                (x1, y0, z0),
-                (x1, y1, z0),
-                (x0, y1, z0),
-                (x0, y0, z1),
-                (x1, y0, z1),
-                (x1, y1, z1),
-                (x0, y1, z1),
-            ]
-        )
-        faces = [
-            (0, 2, 1),
-            (0, 3, 2),
-            (4, 5, 6),
-            (4, 6, 7),
-            (0, 1, 5),
-            (0, 5, 4),
-            (1, 2, 6),
-            (1, 6, 5),
-            (2, 3, 7),
-            (2, 7, 6),
-            (3, 0, 4),
-            (3, 4, 7),
-        ]
-        self.triangles.extend(
-            (first + a, first + b, first + c) for a, b, c in faces
-        )
+        self._boxes.append(_box_bounds(cx, cy, cz, sx, sy, sz))
+
+    def subtract_box(
+        self,
+        cx: float,
+        cy: float,
+        cz: float,
+        sx: float,
+        sy: float,
+        sz: float,
+    ) -> None:
+        self._cutouts.append(_box_bounds(cx, cy, cz, sx, sy, sz))
 
     def write_stl(self, path: Path) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
+        vertices, triangles = self._surface_mesh()
         lines = [f"solid {self.name}"]
-        for a, b, c in self.triangles:
-            va = self.vertices[a]
-            vb = self.vertices[b]
-            vc = self.vertices[c]
+        for a, b, c in triangles:
+            va = vertices[a]
+            vb = vertices[b]
+            vc = vertices[c]
+            normal = _triangle_normal(va, vb, vc)
             lines.extend(
                 [
-                    "  facet normal 0 0 0",
+                    f"  facet normal {normal[0]:.6f} {normal[1]:.6f} {normal[2]:.6f}",
                     "    outer loop",
                     f"      vertex {va[0]:.4f} {va[1]:.4f} {va[2]:.4f}",
                     f"      vertex {vb[0]:.4f} {vb[1]:.4f} {vb[2]:.4f}",
@@ -172,13 +154,14 @@ class Mesh:
 
     def write_3mf(self, path: Path) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
+        vertices, triangles = self._surface_mesh()
         vertices = "\n".join(
             f'          <vertex x="{x:.4f}" y="{y:.4f}" z="{z:.4f}" />'
-            for x, y, z in self.vertices
+            for x, y, z in vertices
         )
         triangles = "\n".join(
             f'          <triangle v1="{a}" v2="{b}" v3="{c}" />'
-            for a, b, c in self.triangles
+            for a, b, c in triangles
         )
         model = f"""<?xml version="1.0" encoding="UTF-8"?>
 <model unit="millimeter" xml:lang="en-US" xmlns="{CORE_NAMESPACE}">
@@ -214,6 +197,148 @@ class Mesh:
             _write_zip_entry(archive, "[Content_Types].xml", content_types)
             _write_zip_entry(archive, "_rels/.rels", rels)
             _write_zip_entry(archive, "3D/3dmodel.model", model)
+
+    def _surface_mesh(self) -> tuple[list[tuple[float, float, float]], list[tuple[int, int, int]]]:
+        if not self._boxes:
+            return [], []
+
+        xs = _sorted_boundaries(self._boxes, self._cutouts, 0, 1)
+        ys = _sorted_boundaries(self._boxes, self._cutouts, 2, 3)
+        zs = _sorted_boundaries(self._boxes, self._cutouts, 4, 5)
+        solid_cells: set[tuple[int, int, int]] = set()
+
+        for ix in range(len(xs) - 1):
+            cx = (xs[ix] + xs[ix + 1]) / 2.0
+            for iy in range(len(ys) - 1):
+                cy = (ys[iy] + ys[iy + 1]) / 2.0
+                for iz in range(len(zs) - 1):
+                    cz = (zs[iz] + zs[iz + 1]) / 2.0
+                    if self._is_solid_point(cx, cy, cz):
+                        solid_cells.add((ix, iy, iz))
+
+        vertices: list[tuple[float, float, float]] = []
+        vertex_index: dict[tuple[float, float, float], int] = {}
+        triangles: list[tuple[int, int, int]] = []
+
+        def vertex_id(vertex: tuple[float, float, float]) -> int:
+            key = tuple(round(value, 4) for value in vertex)
+            if key not in vertex_index:
+                vertex_index[key] = len(vertices)
+                vertices.append(key)
+            return vertex_index[key]
+
+        def add_quad(quad: tuple[tuple[float, float, float], ...]) -> None:
+            a, b, c, d = (vertex_id(vertex) for vertex in quad)
+            triangles.append((a, b, c))
+            triangles.append((a, c, d))
+
+        directions = (
+            (-1, 0, 0),
+            (1, 0, 0),
+            (0, -1, 0),
+            (0, 1, 0),
+            (0, 0, -1),
+            (0, 0, 1),
+        )
+        for ix, iy, iz in sorted(solid_cells):
+            x0, x1 = xs[ix], xs[ix + 1]
+            y0, y1 = ys[iy], ys[iy + 1]
+            z0, z1 = zs[iz], zs[iz + 1]
+            for direction in directions:
+                neighbor = (
+                    ix + direction[0],
+                    iy + direction[1],
+                    iz + direction[2],
+                )
+                if neighbor in solid_cells:
+                    continue
+                add_quad(_face_quad(direction, x0, x1, y0, y1, z0, z1))
+
+        return vertices, triangles
+
+    def _is_solid_point(self, x: float, y: float, z: float) -> bool:
+        inside_box = any(_contains(box, x, y, z) for box in self._boxes)
+        inside_cutout = any(_contains(cutout, x, y, z) for cutout in self._cutouts)
+        return inside_box and not inside_cutout
+
+
+def _box_bounds(
+    cx: float,
+    cy: float,
+    cz: float,
+    sx: float,
+    sy: float,
+    sz: float,
+) -> tuple[float, float, float, float, float, float]:
+    return (
+        cx - sx / 2.0,
+        cx + sx / 2.0,
+        cy - sy / 2.0,
+        cy + sy / 2.0,
+        cz - sz / 2.0,
+        cz + sz / 2.0,
+    )
+
+
+def _sorted_boundaries(
+    boxes: list[tuple[float, float, float, float, float, float]],
+    cutouts: list[tuple[float, float, float, float, float, float]],
+    low_index: int,
+    high_index: int,
+) -> list[float]:
+    boundaries = set()
+    for bounds in boxes + cutouts:
+        boundaries.add(round(bounds[low_index], 4))
+        boundaries.add(round(bounds[high_index], 4))
+    return sorted(boundaries)
+
+
+def _contains(
+    bounds: tuple[float, float, float, float, float, float],
+    x: float,
+    y: float,
+    z: float,
+) -> bool:
+    x0, x1, y0, y1, z0, z1 = bounds
+    return x0 < x < x1 and y0 < y < y1 and z0 < z < z1
+
+
+def _face_quad(
+    direction: tuple[int, int, int],
+    x0: float,
+    x1: float,
+    y0: float,
+    y1: float,
+    z0: float,
+    z1: float,
+) -> tuple[tuple[float, float, float], ...]:
+    if direction == (-1, 0, 0):
+        return ((x0, y0, z0), (x0, y0, z1), (x0, y1, z1), (x0, y1, z0))
+    if direction == (1, 0, 0):
+        return ((x1, y0, z0), (x1, y1, z0), (x1, y1, z1), (x1, y0, z1))
+    if direction == (0, -1, 0):
+        return ((x0, y0, z0), (x1, y0, z0), (x1, y0, z1), (x0, y0, z1))
+    if direction == (0, 1, 0):
+        return ((x0, y1, z0), (x0, y1, z1), (x1, y1, z1), (x1, y1, z0))
+    if direction == (0, 0, -1):
+        return ((x0, y0, z0), (x0, y1, z0), (x1, y1, z0), (x1, y0, z0))
+    return ((x0, y0, z1), (x1, y0, z1), (x1, y1, z1), (x0, y1, z1))
+
+
+def _triangle_normal(
+    va: tuple[float, float, float],
+    vb: tuple[float, float, float],
+    vc: tuple[float, float, float],
+) -> tuple[float, float, float]:
+    ux, uy, uz = vb[0] - va[0], vb[1] - va[1], vb[2] - va[2]
+    vx, vy, vz = vc[0] - va[0], vc[1] - va[1], vc[2] - va[2]
+    nx = uy * vz - uz * vy
+    ny = uz * vx - ux * vz
+    nz = ux * vy - uy * vx
+    length = (nx * nx + ny * ny + nz * nz) ** 0.5
+    if length == 0.0:
+        return (0.0, 0.0, 0.0)
+    return (nx / length, ny / length, nz / length)
 
 
 def _write_zip_entry(archive: zipfile.ZipFile, filename: str, text: str) -> None:
@@ -277,10 +402,13 @@ def build_jetson_tray() -> Mesh:
     outer = (122.0, 102.0, 12.0)
     _base_plate(mesh, outer, 3.0)
     _edge_rails(mesh, outer, 4.0, 9.0, 3.0)
+    mesh.subtract_box(0.0, -49.0, 7.5, 44.0, 10.0, 12.0)
     for x in (-42.0, 42.0):
         for y in (-32.0, 32.0):
             mesh.add_box(x, y, 5.0, 8.0, 8.0, 4.0)
-    mesh.add_box(0.0, -47.0, 6.0, 38.0, 4.0, 6.0)
+            mesh.subtract_box(x, y, 5.0, 3.2, 3.2, 10.0)
+    for y in (-42.0, 42.0):
+        mesh.subtract_box(0.0, y, 1.5, ZIP_TIE_SLOT_MM[0], ZIP_TIE_SLOT_MM[1], 6.0)
     return mesh
 
 
@@ -288,13 +416,24 @@ def build_electronics_side_deck() -> Mesh:
     mesh = Mesh("AILamp_Electronics_Side_Deck")
     outer = (145.0, 48.0, 10.0)
     _base_plate(mesh, outer, 3.0)
-    mesh.add_box(-35.0, 21.0, 6.5, 60.0, 4.0, 7.0)
-    mesh.add_box(-35.0, -21.0, 6.5, 60.0, 4.0, 7.0)
-    mesh.add_box(35.5, 21.0, 6.5, 74.0, 4.0, 7.0)
-    mesh.add_box(35.5, -21.0, 6.5, 74.0, 4.0, 7.0)
+    mesh.add_box(-36.5, 21.0, 6.5, 72.0, 4.0, 7.0)
+    mesh.add_box(-36.5, -21.0, 6.5, 72.0, 4.0, 7.0)
+    mesh.add_box(37.0, 21.0, 6.5, 62.0, 4.0, 7.0)
+    mesh.add_box(37.0, -21.0, 6.5, 62.0, 4.0, 7.0)
     mesh.add_box(0.0, 0.0, 5.0, 5.0, 42.0, 4.0)
-    for x in (-65.0, -5.0, 18.0, 68.0):
+    for x in (-66.0, -7.0, 18.0, 64.0):
         mesh.add_box(x, 0.0, 5.0, 6.0, 8.0, 4.0)
+    for x in (
+        -36.5 - SERVO_DRIVER_MOUNT_HOLE_MM[0] / 2.0,
+        -36.5 + SERVO_DRIVER_MOUNT_HOLE_MM[0] / 2.0,
+    ):
+        for y in (
+            -SERVO_DRIVER_MOUNT_HOLE_MM[1] / 2.0,
+            SERVO_DRIVER_MOUNT_HOLE_MM[1] / 2.0,
+        ):
+            mesh.subtract_box(x, y, 2.0, 3.4, 3.4, 8.0)
+    mesh.subtract_box(68.0, -21.0, 6.5, PICO_USB_RELIEF_MM[0], 10.0, 10.0)
+    mesh.subtract_box(37.0, 0.0, 1.5, 38.0, 4.0, 6.0)
     return mesh
 
 
@@ -309,6 +448,8 @@ def build_camera_mount() -> Mesh:
         (-14.0, 14.0, screw_clearance, screw_clearance),
         (14.0, -14.0, screw_clearance, screw_clearance),
         (14.0, 14.0, screw_clearance, screw_clearance),
+        (0.0, -17.5, LAMP_HEAD_STRAP_SLOT_MM[0], LAMP_HEAD_STRAP_SLOT_MM[1]),
+        (0.0, 17.5, LAMP_HEAD_STRAP_SLOT_MM[0], LAMP_HEAD_STRAP_SLOT_MM[1]),
     )
     _plate_with_square_cutouts(mesh, outer_x, outer_y, plate_thickness, cutouts)
     _edge_rails(mesh, (outer_x, outer_y, 10.0), 3.0, 7.0, 3.0)
@@ -327,10 +468,11 @@ def build_neomatrix_holder() -> Mesh:
     outer = (86.0, 86.0, 8.0)
     _base_plate(mesh, outer, 2.5)
     _edge_rails(mesh, outer, 5.0, 5.5, 2.5)
-    for x in (-32.0, 32.0):
-        mesh.add_box(x, 0.0, 5.0, 4.0, 70.0, 3.0)
-    for y in (-32.0, 32.0):
-        mesh.add_box(0.0, y, 5.0, 70.0, 4.0, 3.0)
+    for x in (-34.0, 34.0):
+        for y in (-34.0, 34.0):
+            mesh.add_box(x, y, 5.0, 8.0, 8.0, 3.0)
+    mesh.subtract_box(0.0, -40.0, 5.0, 20.0, 8.0, 8.0)
+    mesh.subtract_box(0.0, 0.0, 1.5, 54.0, 54.0, 5.0)
     return mesh
 
 
@@ -344,6 +486,9 @@ def build_respeaker_mount() -> Mesh:
     for x in (-30.0, 0.0, 30.0):
         mesh.add_box(x, 21.0, 5.0, 10.0, 4.0, 3.0)
         mesh.add_box(x, -21.0, 5.0, 10.0, 4.0, 3.0)
+    for x in (-24.0, 24.0):
+        mesh.subtract_box(x, 0.0, 1.5, 18.0, 4.0, 6.0)
+    mesh.subtract_box(0.0, -23.0, 5.0, 22.0, 8.0, 8.0)
     return mesh
 
 
@@ -358,6 +503,7 @@ def build_cable_clip(
     mesh.add_box(sx / 2.0 - wall / 2.0, 0.0, sz / 2.0, wall, sy, sz - 2.5)
     mesh.add_box(0.0, -sy / 2.0 + 2.0, sz / 2.0, sx, 4.0, sz - 2.5)
     mesh.add_box(0.0, sy / 2.0 - 1.5, sz - 1.0, sx, 3.0, 2.0)
+    mesh.subtract_box(0.0, 0.0, 1.25, sx - 8.0, 4.0, 5.0)
     return mesh
 
 

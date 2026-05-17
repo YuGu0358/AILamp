@@ -6,12 +6,15 @@ from datetime import datetime
 from datetime import timezone
 from pathlib import Path
 import sys
+import xml.etree.ElementTree as ET
 
 from ailamp.agent.livekit_agent import AILampToolbox, DryRunLEDService, DryRunMotorService
 from ailamp.config import load_hardware_config
+from ailamp.hardware_check import CheckResult
 from ailamp.hardware_check import run_device_presence_checks, run_static_hardware_checks
 from ailamp.paths import resolve_project_path
 from ailamp.models import BehaviorAction, VisionEvent, VisionEventType
+from ailamp.runtime_check import run_runtime_checks
 from ailamp.services.behavior import BehaviorService
 from ailamp.services.birthday import BirthdayService
 from ailamp.services.decision import DecisionService
@@ -26,6 +29,15 @@ from ailamp.simulation.sim_vision import classify_virtual_target_from_joints
 
 
 DEFAULT_CONFIG = "config/hardware.toml"
+EXPECTED_SIM_ACTUATORS = ["2", "1", "3", "4", "5"]
+SIM_CHECK_RECORDINGS = ["wake_up", "idle", "nod", "scanning", "shy"]
+SIM_CHECK_ADAPTER_VISUALS = [
+    "ailamp_jetson_tray_visual",
+    "ailamp_electronics_deck_visual",
+    "ailamp_camera_mount_visual",
+    "ailamp_neomatrix_visual",
+    "ailamp_respeaker_visual",
+]
 
 
 def _config(args):
@@ -39,6 +51,20 @@ def hardware_check(args) -> int:
         results.extend(run_device_presence_checks(config))
     if args.failures_only:
         results = [result for result in results if not result.passed]
+    for result in results:
+        print(result.format())
+    return 0 if all(result.passed for result in results) else 1
+
+
+def runtime_check(args) -> int:
+    config = _config(args)
+    results = run_runtime_checks(
+        config,
+        include_voice=args.include_voice,
+        include_motor_runtime=args.include_motor_runtime,
+    )
+    if args.include_devices:
+        results.extend(run_device_presence_checks(config))
     for result in results:
         print(result.format())
     return 0 if all(result.passed for result in results) else 1
@@ -104,6 +130,85 @@ def sim_viewer(args) -> int:
         output = runner.render(args.render)
         print("render:", output)
     return 0
+
+
+def sim_check(args) -> int:
+    config = _config(args)
+    runner = MujocoRunner(config.simulation.model_path, lock_freejoint=config.simulation.lock_freejoint)
+    results: list[CheckResult] = []
+
+    try:
+        info = runner.info()
+        results.extend(_sim_info_checks(config, info))
+        results.extend(_sim_recording_checks(runner, config))
+        results.append(_sim_virtual_events_check())
+        results.append(_sim_adapter_visuals_check(config))
+        if args.render:
+            output = runner.render(args.render)
+            results.append(CheckResult("sim.render", True, str(output)))
+    except Exception as exc:  # noqa: BLE001 - command should report a clear failed check.
+        results.append(CheckResult("sim.load", False, str(exc)))
+
+    for result in results:
+        print(result.format())
+    return 0 if all(result.passed for result in results) else 1
+
+
+def _sim_info_checks(config, info) -> list[CheckResult]:
+    model_path = resolve_project_path(config.simulation.model_path)
+    actuators = list(info.actuators)
+    joints = set(info.joints)
+    return [
+        CheckResult("sim.model", model_path.exists(), str(model_path)),
+        CheckResult("sim.nu", info.nu == 5, str(info.nu)),
+        CheckResult("sim.actuators", actuators == EXPECTED_SIM_ACTUATORS, ",".join(actuators)),
+        CheckResult(
+            "sim.root_freejoint",
+            config.simulation.lock_freejoint and "lamparm__base_elbow_freejoint" in joints,
+            f"lock_freejoint={config.simulation.lock_freejoint}",
+        ),
+        CheckResult(
+            "sim.target_joints",
+            {"target_slide_x", "target_slide_y"}.issubset(joints),
+            ",".join(sorted(joints)),
+        ),
+    ]
+
+
+def _sim_recording_checks(runner: MujocoRunner, config) -> list[CheckResult]:
+    results: list[CheckResult] = []
+    for recording in SIM_CHECK_RECORDINGS:
+        try:
+            frames = runner.replay_recording(recording, config.simulation.recordings_dir, max_frames=5)
+            results.append(CheckResult(f"sim.recording.{recording}", frames > 0, str(frames)))
+        except Exception as exc:  # noqa: BLE001 - report individual recording failure.
+            results.append(CheckResult(f"sim.recording.{recording}", False, str(exc)))
+    return results
+
+
+def _sim_virtual_events_check() -> CheckResult:
+    target_joint_sets = [
+        None,
+        {"target_slide_x": -0.6, "target_slide_y": -1.5},
+        {"target_slide_x": 0.0, "target_slide_y": -1.5},
+        {"target_slide_x": 0.6, "target_slide_y": -1.5},
+        {"target_slide_x": 0.0, "target_slide_y": -0.45},
+        {"target_slide_x": 0.0, "target_slide_y": -3.8},
+    ]
+    events = [classify_virtual_target_from_joints(joints).event_type.value for joints in target_joint_sets]
+    expected = ["no_person", "person_left", "person_center", "person_right", "person_close", "person_far"]
+    return CheckResult("sim.virtual_events", events == expected, ",".join(events))
+
+
+def _sim_adapter_visuals_check(config) -> CheckResult:
+    scene_path = resolve_project_path(config.simulation.model_path)
+    root = ET.parse(scene_path).getroot()
+    geoms = {geom.attrib.get("name"): geom.attrib for geom in root.findall(".//geom") if geom.attrib.get("name")}
+    valid = True
+    for name in SIM_CHECK_ADAPTER_VISUALS:
+        geom = geoms.get(name)
+        valid = valid and geom is not None and geom.get("contype") == "0" and geom.get("conaffinity") == "0"
+    return CheckResult("sim.adapter_visuals", valid, ",".join(SIM_CHECK_ADAPTER_VISUALS))
 
 
 def camera_test(args) -> int:
@@ -246,7 +351,7 @@ def vision_loop(args) -> int:
 def agent(args) -> int:
     from ailamp.agent.livekit_agent import run_agent
 
-    run_agent(args.config)
+    run_agent(args.config, with_outputs=args.with_outputs)
     return 0
 
 
@@ -304,6 +409,12 @@ def build_parser() -> argparse.ArgumentParser:
     hardware.add_argument("--failures-only", action="store_true")
     hardware.set_defaults(func=hardware_check)
 
+    runtime = subparsers.add_parser("runtime-check")
+    runtime.add_argument("--include-devices", action="store_true")
+    runtime.add_argument("--include-voice", action="store_true")
+    runtime.add_argument("--include-motor-runtime", action="store_true")
+    runtime.set_defaults(func=runtime_check)
+
     led = subparsers.add_parser("led-test")
     led.add_argument("--color", nargs=3, type=int, default=(255, 180, 80))
     led.set_defaults(func=led_test)
@@ -317,7 +428,9 @@ def build_parser() -> argparse.ArgumentParser:
     vision_loop_parser.add_argument("--interval", type=float, default=None, help="Seconds between frames")
     vision_loop_parser.add_argument("--with-outputs", action="store_true", help="Drive ST3215 motions and Pico LEDs")
     vision_loop_parser.set_defaults(func=vision_loop)
-    subparsers.add_parser("agent").set_defaults(func=agent)
+    agent_parser = subparsers.add_parser("agent")
+    agent_parser.add_argument("--with-outputs", action="store_true", help="Allow agent tools to drive ST3215 motions and Pico LEDs")
+    agent_parser.set_defaults(func=agent)
     agent_tools = subparsers.add_parser("agent-tools-test")
     agent_tools.add_argument(
         "--event",
@@ -349,6 +462,10 @@ def build_parser() -> argparse.ArgumentParser:
     sim_viewer_parser = subparsers.add_parser("sim-viewer")
     sim_viewer_parser.add_argument("--render", default=None)
     sim_viewer_parser.set_defaults(func=sim_viewer)
+
+    sim_check_parser = subparsers.add_parser("sim-check")
+    sim_check_parser.add_argument("--render", default=None)
+    sim_check_parser.set_defaults(func=sim_check)
 
     return parser
 

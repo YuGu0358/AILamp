@@ -74,6 +74,64 @@ def test_simulation_docs_list_adapter_visuals():
         assert visual_name in docs_text
 
 
+def test_top_level_docs_describe_adapter_kit():
+    root = Path(__file__).resolve().parents[1]
+    readme = (root / "README.md").read_text()
+    notice = (root / "NOTICE.md").read_text()
+
+    assert "3D/AILamp_Adapters/" in readme
+    assert "2-manifold" in readme
+    assert "Generated AILamp adapter kit" in notice
+    assert "simplified visual geoms for the AILamp hardware adapter kit" in notice
+
+
+def test_assembly_and_runtime_docs_include_nano_acceptance_flow():
+    root = Path(__file__).resolve().parents[1]
+    docs_text = "\n".join(
+        [
+            (root / "docs/en/3-assembly.md").read_text(),
+            (root / "docs/zh/3-装配.md").read_text(),
+            (root / "docs/en/4-runtime-setup.md").read_text(),
+            (root / "docs/zh/4-运行环境.md").read_text(),
+            (root / "docs/en/5-control-vision-simulation.md").read_text(),
+            (root / "docs/zh/5-控制视觉仿真.md").read_text(),
+        ]
+    )
+
+    required_phrases = [
+        "runtime-check",
+        "sim-check",
+        "agent --with-outputs",
+        "Jetson Nano",
+        "Do not run `--with-outputs` before `led-test` and `motor-test` pass",
+        "不要在 `led-test` 和 `motor-test` 通过前运行 `--with-outputs`",
+        "mechanical fit",
+        "power checks",
+        "软件验收",
+    ]
+    for phrase in required_phrases:
+        assert phrase in docs_text
+
+
+def test_adapter_design_docs_match_current_geometry_scope():
+    root = Path(__file__).resolve().parents[1]
+    design_spec = (
+        root / "docs/superpowers/specs/2026-05-14-ailamp-3d-hardware-adapter-kit-design.md"
+    ).read_text()
+    english_print = (root / "docs/en/1-3d-print.md").read_text()
+    chinese_print = (root / "docs/zh/1-3D打印.md").read_text()
+
+    for stale_phrase in (
+        "slight downward viewing angle",
+        "lens cylinder",
+        "rounded internal channels",
+    ):
+        assert stale_phrase not in design_spec
+
+    assert "matching `.stl` export" in english_print
+    assert "同名 `.stl` 导出文件" in chinese_print
+
+
 def test_adapter_docs_do_not_reintroduce_destructive_original_part_edits():
     root = Path(__file__).resolve().parents[1]
     docs_text = "\n".join(

@@ -3,6 +3,8 @@
 ## Simulation
 
 ```bash
+ailamp sim-check
+ailamp sim-check --render outputs/sim_check.png
 ailamp sim-demo
 ailamp sim-viewer --render outputs/ailamp.png
 ```
@@ -29,6 +31,8 @@ ailamp_respeaker_visual -> ReSpeaker XVF3800 external mount
 ```
 
 These geoms are visual-only placement references. They do not change the LeLamp servo kinematic chain or actuator mapping.
+
+`sim-check` is the preferred non-interactive acceptance command. It validates the model load, five-actuator mapping, locked root freejoint, adapter visuals, virtual target events, and core recording playback.
 
 ## Vision Events
 
@@ -64,6 +68,7 @@ ailamp agent-tools-test --event person_close --apply
 ailamp agent-tools-test --event posture_studying --apply
 ailamp agent-tools-test --event person_right --offset 0.6 --request "follow me" --apply
 ailamp agent
+ailamp agent --with-outputs
 ```
 
 `vision-demo` captures one frame and prints the detected event, motion, and LED color.
@@ -127,6 +132,8 @@ Gesture and posture support is heuristic in this version:
 - leaving the seat transitions to `idle`
 
 Run `vision-loop` alongside `agent` when you want the AI tools to use live camera state. The LiveKit/OpenAI agent reads `outputs/vision_state.json` and exposes tools to:
+
+`ailamp agent` uses dry-run motion and light outputs by default. Use `ailamp agent --with-outputs` only after the Jetson Nano hardware acceptance flow has passed.
 
 - describe available tools
 - decide a response from vision plus voice intent

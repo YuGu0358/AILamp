@@ -74,6 +74,25 @@ def parse_3mf_mesh(path):
     return parsed_vertices, parsed_triangles
 
 
+def count_non_manifold_edges(vertices, triangles):
+    coordinate_to_index = {}
+    for vertex in vertices:
+        coordinate_to_index.setdefault(tuple(round(value, 4) for value in vertex), len(coordinate_to_index))
+
+    edge_counts = {}
+    for triangle in triangles:
+        remapped = [coordinate_to_index[tuple(round(vertices[index][axis], 4) for axis in range(3))] for index in triangle]
+        for start, end in (
+            (remapped[0], remapped[1]),
+            (remapped[1], remapped[2]),
+            (remapped[2], remapped[0]),
+        ):
+            edge = tuple(sorted((start, end)))
+            edge_counts[edge] = edge_counts.get(edge, 0) + 1
+
+    return sum(1 for count in edge_counts.values() if count != 2)
+
+
 def assert_3mf_triangle_indices_are_valid(path):
     vertices, triangles = parse_3mf_mesh(path)
     assert vertices
@@ -83,6 +102,11 @@ def assert_3mf_triangle_indices_are_valid(path):
         assert len(set(triangle)) == 3
         for index in triangle:
             assert 0 <= index < vertex_count
+
+
+def assert_3mf_is_two_manifold(path):
+    vertices, triangles = parse_3mf_mesh(path)
+    assert count_non_manifold_edges(vertices, triangles) == 0
 
 
 def test_adapter_specs_use_loose_fit_clearances():
@@ -100,10 +124,13 @@ def test_adapter_specs_use_loose_fit_clearances():
         generator.JETSON_BOARD_MM[1] + pcb_clearance,
     )
     assert specs["AILamp_Electronics_Side_Deck"].board_pocket_mm == (145.0, 48.0)
+    assert generator.SERVO_DRIVER_MOUNT_HOLE_MM == (58.0, 23.0)
+    assert generator.PICO_USB_RELIEF_MM[0] >= 12.0
     assert specs["AILamp_Head_Camera_Mount"].board_pocket_mm == (
         generator.CAMERA_BOARD_MM[0] + pcb_clearance,
         generator.CAMERA_BOARD_MM[1] + pcb_clearance,
     )
+    assert generator.LAMP_HEAD_STRAP_SLOT_MM == (34.0, 4.0)
     assert specs["AILamp_NeoMatrix_Holder"].board_pocket_mm == (
         generator.NEOMATRIX_BOARD_MM[0] + pcb_clearance,
         generator.NEOMATRIX_BOARD_MM[1] + pcb_clearance,
@@ -195,6 +222,7 @@ def test_generated_adapter_files_match_specs_and_are_reproducible(tmp_path):
             round(spec.outer_mm[2], 2),
         )
         assert_3mf_triangle_indices_are_valid(first_3mf)
+        assert_3mf_is_two_manifold(first_3mf)
 
         stl_lines = first_stl.read_text().splitlines()
         assert stl_lines[0] == f"solid {adapter_name}"
@@ -212,3 +240,6 @@ def test_checked_in_adapter_files_match_fresh_generation(tmp_path):
             checked_in = ROOT / "3D/AILamp_Adapters" / f"{spec.name}{suffix}"
             generated = generated_dir / f"{spec.name}{suffix}"
             assert checked_in.read_bytes() == generated.read_bytes()
+
+        checked_in_3mf = ROOT / "3D/AILamp_Adapters" / f"{spec.name}.3mf"
+        assert_3mf_is_two_manifold(checked_in_3mf)

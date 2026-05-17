@@ -85,7 +85,7 @@ The side deck holds the Waveshare ST3215 Servo Driver with ESP32 and the Raspber
 
 ### Head Camera Mount
 
-The camera mount holds the Arducam UB0234 at the lamp head front/top area without modifying the original lamp head mesh. It uses a 32 x 32 mm board pocket with 28 x 28 mm hole pitch, a central M12 lens clearance aperture, and a slight downward viewing angle for desk/person tracking. The mount attaches by strap, screw clamp, or reversible bracket geometry rather than cutting the lamp head.
+The camera mount holds the Arducam UB0234 at the lamp head front/top area without modifying the original lamp head mesh. It uses a 32 x 32 mm board pocket with 28 x 28 mm hole pitch, a central M12 lens clearance aperture, and strap slots so the final viewing direction can be adjusted with placement or a thin shim during physical calibration. The first generated adapter is a flat reversible bracket rather than an angled camera body, so it remains easy to print and does not assume the final lamp-head strap path.
 
 ### NeoMatrix Holder
 
@@ -102,7 +102,7 @@ Two cable clip sizes are included:
 - 6 mm internal channel for USB/signal cable groups.
 - 10 mm internal channel for combined power or servo cable bundles.
 
-Both clips use rounded internal channels, small zip-tie windows, and flat mounting pads. Clips are separate parts so the final routing can be adjusted after the real lamp is assembled.
+Both clips use loose rectangular internal channels, small zip-tie windows, and flat mounting pads. Clips are separate parts so the final routing can be adjusted after the real lamp is assembled.
 
 ## Simulation Representation
 
@@ -110,7 +110,7 @@ MuJoCo simulation should not attempt to reproduce every adapter screw boss. Add 
 
 - A thin base-adjacent Jetson tray.
 - A small electronics board group.
-- A lamp-head camera block with lens cylinder.
+- A lamp-head camera block with a simplified board and lens-clearance volume.
 - A square LED matrix plane behind the diffuser.
 - A ReSpeaker block on or near the base.
 

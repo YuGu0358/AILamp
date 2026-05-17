@@ -147,13 +147,20 @@ class AILampToolbox:
         return self.led.solid(red, green, blue)
 
 
-def run_agent(config_path: str) -> None:
+def run_agent(config_path: str, *, with_outputs: bool = False) -> None:
     # Import lazily so non-voice commands do not require LiveKit/OpenAI deps.
     from dotenv import load_dotenv  # type: ignore
     from livekit import agents  # type: ignore
 
     load_dotenv()
-    toolbox = AILampToolbox(config_path)
+    if with_outputs:
+        toolbox = AILampToolbox(config_path)
+    else:
+        toolbox = AILampToolbox(
+            config_path,
+            led_service=DryRunLEDService(),
+            motor_service=DryRunMotorService(),
+        )
 
     async def entrypoint(ctx):  # pragma: no cover - requires LiveKit runtime
         from livekit.agents import Agent, AgentSession, RoomInputOptions, function_tool  # type: ignore
@@ -164,9 +171,11 @@ def run_agent(config_path: str) -> None:
                 super().__init__(
                     instructions=(
                         "You are AILamp, an interactive robotic desk lamp. "
-                        "Use concise English. Inspect vision state when the user asks what you see. "
+                        "Reply in the user's language, Chinese or English, and keep responses concise. "
+                        "Inspect vision state when the user asks what you see. "
                         "Use motion and light tools for physical responses, and prefer the mapped "
-                        "vision behavior when the user asks the lamp to react to a person."
+                        "vision behavior when the user asks the lamp to react to a person. "
+                        "If tools report dry-run output, say the action was simulated rather than physically applied."
                     )
                 )
 
