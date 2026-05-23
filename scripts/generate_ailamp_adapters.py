@@ -41,43 +41,90 @@ LELAMP_BASE_FOOTPRINT_MM = (160.0, 190.0)
 # the horn to the inside of the LampArm.  We just have to expose the motor
 # body up through the shell top so the LampArm socket can drop over it.
 
+# STS3215 dimensions per AnnotatedSTS3215.jpg datasheet:
+#   ServoHeight × ServoWidth × ServoDepth = 45.22 × 24.72 × 29.0 mm
+#   Drive horn (output): Φ19.2 × 4.5 mm (from upstream 金属舵盘_驱动__v2.stl)
+#   Idle horn (axis alignment): Φ19.2 × 3.3 mm (from 金属舵盘_从动__v2.stl)
 MOTOR_BODY_SIZE_MM = (24.72, 45.22, 29.0)
-MOTOR_CAVITY_INNER_MM = (24.8, 45.3)
-MOTOR_CAVITY_OUTER_MM = (30.8, 51.3)
-MOTOR_CAVITY_HEIGHT_MM = 32.0
+MOTOR_CAVITY_INNER_MM = (24.7, 45.2)       # tight slip-fit on the 24.72×45.22 body
+MOTOR_CAVITY_OUTER_MM = (30.7, 51.2)       # 3 mm walls (matches original 30.7×51.2)
+MOTOR_CAVITY_HEIGHT_MM = 30.0              # interior cavity height (z=7..37)
 MOTOR_CENTER_XY_MM = (0.0, -25.7)
-MOTOR_PASS_THROUGH_MM = (24.8, 45.3)
+MOTOR_PASS_THROUGH_MM = (24.7, 45.2)
 CABLE_SLIT_MM = (24.7, 10.0)
 CABLE_SLIT_CENTER_XY_MM = (0.0, 4.9)
 
-# Cradle bottom floor (2 mounting flanges + 4 M2.5 self-tap screw holes + Φ21
-# wire pass-through) — replicates the original LeLamp LampBase 3MF bottom
-# layer that anchors the STS3215 body and routes daisy-chain wires from the
-# top cable slit down to the motor driver in the main cavity.
+# Cradle bottom floor — Interpretation A "vertical motor" assembly per
+# original LeLamp LampBase.3mf measured geometry (sliced and verified):
 #
-# Floor sits above the cover lip insertion zone (z = 0 → COVER_LIP_HEIGHT_MM)
-# at z = COVER_LIP_HEIGHT_MM → COVER_LIP_HEIGHT_MM + MOTOR_FLOOR_THICKNESS_MM
-# (z = 4 → 7).  Motor body then rests at z = 7 → 36 (29 mm tall), and the
-# horn protrudes z = 36 → 44 with its top 2 mm above the shell's exterior
-# top (z = 42), exactly matching the original LeLamp horn protrusion.
+#   * Motor body is inserted INTO the cradle FROM BELOW (through the shell's
+#     open bottom), with the body's 45.22×24.72 large face DOWN onto the
+#     floor and the 29 mm depth running vertical.
+#   * Body's 4 mounting tabs land on the 2 floor flanges; 4× M2.5 self-tap
+#     screws come up from below and lock the body to the floor.
+#   * Drive horn (Φ19.2, top of motor body) protrudes UP into the cradle
+#     cavity and exits through the shell-top 24.7×45.2 motor pass-through.
+#   * Idle horn (Φ19.2, bottom of motor body — for axis alignment) drops
+#     DOWN into the Φ21 idle-horn pocket on the front flange.
+#
+# Floor sits above the cover-lip insertion zone (z = 0 → COVER_LIP_HEIGHT_MM)
+# at z = COVER_LIP_HEIGHT_MM → +MOTOR_FLOOR_THICKNESS_MM (z = 4 → 7).
 MOTOR_FLOOR_THICKNESS_MM = 3.0
-MOTOR_FLOOR_BOTTOM_Z_MM = 4.0           # above the cover lip (z = 0 → 4)
+MOTOR_FLOOR_BOTTOM_Z_MM = 4.0
 MOTOR_FLOOR_REAR_FLANGE_MM = (30.7, 21.0)
 MOTOR_FLOOR_FRONT_FLANGE_MM = (30.7, 24.7)
-MOTOR_FLOOR_FRONT_OFFSET_MM = 28.3       # front flange Y center = motor Y + 28.3
-MOTOR_FLOOR_SCREW_PILOT_RADIUS_MM = 1.25  # Φ2.5 M2.5 self-tap pilot
-MOTOR_FLOOR_SCREW_SINK_RADIUS_MM = 1.75   # Φ3.5 head countersink
+MOTOR_FLOOR_FRONT_OFFSET_MM = 28.3
+MOTOR_FLOOR_SCREW_PILOT_RADIUS_MM = 1.25
+MOTOR_FLOOR_SCREW_SINK_RADIUS_MM = 1.75
 MOTOR_FLOOR_SCREW_SINK_HEIGHT_MM = 0.6
 MOTOR_FLOOR_REAR_SCREW_Y_OFFSET_MM = -5.2
 MOTOR_FLOOR_FRONT_SCREW_Y_OFFSET_MM = -9.1
 MOTOR_FLOOR_SCREW_X_OFFSET_MM = 10.3
-MOTOR_FLOOR_WIRE_HOLE_RADIUS_MM = 10.5    # Φ21 daisy-chain pass-through
-MOTOR_FLOOR_WIRE_HOLE_Y_OFFSET_MM = -1.0   # offset from front flange center
+MOTOR_FLOOR_IDLE_HORN_POCKET_RADIUS_MM = 10.5    # Φ21 idle-horn axis pocket
+MOTOR_FLOOR_IDLE_HORN_POCKET_Y_OFFSET_MM = -1.0    # offset from front flange center
+
+# v6.2 — confirmed-from-photo features:
+#   * Cradle interior rear-half ceiling — original LampBase has a solid shelf
+#     between the cradle wall top and the shell-top motor pass-through that
+#     closes the rear of the cradle.  Without it, looking from below into the
+#     cradle you see straight up through the shell top; with it, the rear
+#     half of the cradle has a solid ceiling at z = cavity_top_z, leaving only
+#     the front half open for the drive horn to protrude through.
+#   * 4 small alignment posts at the cradle's bottom corners — Φ4 × 2 mm
+#     stubs that locate the STS3215 body's 4 mounting tabs on the floor
+#     before screws are tightened.
+MOTOR_CRADLE_REAR_SHELF_LENGTH_MM = 22.6   # half the cradle inner Y length
+MOTOR_CRADLE_REAR_SHELF_THICKNESS_MM = 2.0
+MOTOR_CRADLE_CORNER_POST_RADIUS_MM = 2.0   # Φ4
+MOTOR_CRADLE_CORNER_POST_HEIGHT_MM = 2.0   # 2 mm protrusion
+MOTOR_CRADLE_CORNER_POST_INSET_MM = 3.0    # inset from cradle outer corners
 
 BASE_ARM_LINK_BOOT_MM = (74.0, 74.0, 42.0)
 BASE_ARM_LINK_BOOT_CLEARANCE_MM = (42.0, 48.0)
-INTEGRATED_BASE_OUTER_MM = (190.0, 230.0, 42.0)
-INTEGRATED_BASE_TOP_THICKNESS_MM = 3.0
+# v7.3-C: shrunk from 190×230 to 155×225 (-35 × -5 mm, ~28% volume savings).
+# Z stays 40 mm to match the original LampBase cradle's horn-protrusion height.
+INTEGRATED_BASE_OUTER_MM = (155.0, 225.0, 40.0)
+INTEGRATED_BASE_TOP_THICKNESS_MM = 2.0
+# v7.3-C cradle insert: SMALL CROP — only the cradle structure itself.
+#
+# Original LampBase shell outer: 160 × 190 × 40 mm with inner cavity 154 × 184
+# mm.  Inside that cavity, the original has 8 Pi mount bosses (58×49 pattern,
+# for Raspberry Pi — wrong for AILamp's Jetson Nano), 8 Waveshare driver
+# mount bosses (designed for original-position driver, in the wrong place now
+# that we moved the driver behind the cradle), and 4 corner case-screw
+# bosses (also superseded — v7.3-C uses corner case-screw bosses pushed
+# further to the actual shell corners).
+#
+# We crop tightly to ONLY the cradle structure proper (X ± 25, Y -55..+25) so
+# all those unused original bosses are discarded.  AILamp adds its own
+# Jetson + driver + Pico + 4-corner case-screw bosses via
+# _integrated_base_internal_features().
+CRADLE_INSERT_X_HALF_MM = 25.0     # JUST the cradle structure
+CRADLE_INSERT_Y_MIN_MM = -55.0     # cradle rear extent
+CRADLE_INSERT_Y_MAX_MM = 38.0      # extends past the cable slit (capsule at Y=+30.6,
+                                   # span +25.6..+35.6) so the cable slit comes through
+                                   # while still excluding Pi/Waveshare bosses at Y≥+50
+CRADLE_INSERT_Z_OFFSET_MM = 4.0    # shift original z=-4 → new z=0
 COVER_FLANGE_THICKNESS_MM = 2.0
 COVER_LIP_HEIGHT_MM = 4.0
 COVER_TOTAL_THICKNESS_MM = COVER_FLANGE_THICKNESS_MM + COVER_LIP_HEIGHT_MM
@@ -90,13 +137,24 @@ INTEGRATED_BASE_COVER_MM = (
 INTEGRATED_BASE_Y_CENTER_MM = 15.0
 INTEGRATED_BASE_WALL_MM = 2.5
 INTEGRATED_BASE_CASE_SCREW_POSITIONS_MM = (
-    (-82.0, -88.0),
-    (-82.0, 118.0),
-    (82.0, -88.0),
-    (82.0, 118.0),
+    # v7.3-C: pushed to the actual shell corners (was at original-LampBase
+    # positions (±73.5, -76/+101) in v7.2.x — those came from the cradle
+    # insert and were inset 13 mm from the corners of the smaller original
+    # shell).  Now with a 155×225 shell, max corner positions inside the
+    # cavity with 5 mm wall clearance + 5 mm boss radius are (±67, -87/+117).
+    (-67.0, -87.0),
+    (-67.0, 117.0),
+    (67.0, -87.0),
+    (67.0, 117.0),
 )
 JETSON_STANDOFF_SPACING_MM = (84.0, 64.0)
 JETSON_STANDOFF_HOLE_MM = 3.4
+# v7.3-C: Pico WH (51 × 21 mm, rotated 90° → 21 × 51 in our layout) placed
+# beside cradle on the right at (+45, 0).  Standard Pico mount-hole pattern
+# is 47 × 11.4 mm — rotated to 11.4 × 47 to match the board orientation.
+PICO_CENTER_XY_MM = (45.0, 0.0)
+PICO_HOLE_PATTERN_MM = (11.4, 47.0)
+PICO_STANDOFF_HOLE_MM = 2.1     # phi 2.1 for M2 self-tap
 CASE_SCREW_CLEARANCE_MM = 4.0
 INTEGRATED_BASE_CORNER_RADIUS_MM = 18.0
 INTEGRATED_BASE_COVER_CORNER_RADIUS_MM = 16.0
@@ -1164,45 +1222,65 @@ def _plate_with_square_cutouts(
                 mesh.add_box(cx, cy, thickness / 2.0, x1 - x0, y1 - y0, thickness)
 
 
-def _integrated_base_internal_features() -> TriangleMesh:
-    """v6 internal layout: case-screw bosses + board standoffs as full-height columns.
+_JETSON_STANDOFF_HEIGHT_MM = 8.0
+_DRIVER_STANDOFF_HEIGHT_MM = 7.0
+_PICO_STANDOFF_HEIGHT_MM = 7.0
+_CASE_SCREW_BOSS_HEIGHT_MM = 32.0   # tall column from z=cavity floor up to top
+_CASE_SCREW_BOSS_INNER_R_MM = 1.25  # phi 2.5 M2 self-tap for cover screws
 
-    The v6 shell is bottom-open, top-closed.  All internal posts therefore run
-    from the print-bed-resting open bottom (z = 0) up to the closed-top
-    underside (z = outer_h - top_t), giving each column a solid base on the bed
-    *and* a structural tie to the closed top.  Board mounting threads live in
-    the upper end of each column (the topmost ``standoff_engagement_h`` of the
-    full column height); the cover-to-shell case-screw bosses thread into their
-    lower ends from below.
+
+def _integrated_base_internal_features() -> TriangleMesh:
+    """v7.3-C internal layout: ALL cover/board mount posts (we now own them).
+
+    With the smaller v7.3-C cradle insert (X ± 25 only), the original
+    LampBase's Pi mounts, Waveshare mounts, and corner case-screw bosses are
+    all discarded.  AILamp now provides:
+
+      * 4 corner case-screw bosses at INTEGRATED_BASE_CASE_SCREW_POSITIONS_MM
+        ((±67, -87/+117)) — phi 2.5 self-tap, ~32 mm tall (z=4..36) for
+        proper cover-to-shell clamping at the actual shell corners.
+      * 4 Jetson Nano standoffs (84 × 64 pattern) at (±42, +43/+107),
+        phi 3.4 self-tap, 8 mm tall hanging from the closed top.
+      * 4 Waveshare ST3215 driver standoffs (58 × 23 pattern) at
+        (±29, -53.5/-76.5), phi 3.4 self-tap, 7 mm tall.
+      * 4 Pico WH standoffs (11.4 × 47 rotated pattern) at (+45, 0)
+        ± (5.7, 23.5), phi 2.1 M2 self-tap, 7 mm tall.
     """
     features = TriangleMesh("AILamp_LampBase_Electronics_Internal_Features")
 
     outer_h = INTEGRATED_BASE_OUTER_MM[2]
     top_floor_underside_z = outer_h - INTEGRATED_BASE_TOP_THICKNESS_MM
 
-    # Four case-screw bosses tying the cover (entering from below at z = 0)
-    # to the shell's closed top — full-height columns for both print-bed
-    # adhesion and structural tie-back.
-    for x, y in INTEGRATED_BASE_CASE_SCREW_POSITIONS_MM:
+    # 4 corner case-screw bosses — phi 10 OD with phi 2.5 self-tap pilot, full
+    # height columns from z=4 up to the top-floor underside (~32 mm tall).
+    # Cover screws enter from below (z < 0), pass through cover (z = 0..6),
+    # and self-tap into the boss starting at z = 4 — ~28 mm of engagement.
+    case_screw_z_bottom = 4.0
+    case_screw_height = top_floor_underside_z - case_screw_z_bottom
+    for cx, cy in INTEGRATED_BASE_CASE_SCREW_POSITIONS_MM:
         features.extend_triangle_mesh(
             _cylinder_ring_mesh(
                 "case_screw_boss",
-                x,
-                y,
-                z_bottom=0.0,
-                height=top_floor_underside_z,
+                cx,
+                cy,
+                z_bottom=case_screw_z_bottom,
+                height=case_screw_height,
                 outer_radius=5.0,
-                inner_radius=CASE_SCREW_CLEARANCE_MM / 2.0,
+                inner_radius=_CASE_SCREW_BOSS_INNER_R_MM,
             )
         )
 
-    # Jetson Nano standoffs (84 x 64 mm pattern).  Full-height column; the
-    # board mounts on the top 8 mm of the column flush against the closed-top
-    # underside.  Board is placed *in front of* the motor cradle (which
-    # occupies y ≈ -51..0); the Jetson PCB at jetson_y = +50 spans
-    # y = +10..+90 with 10 mm clearance from the cradle and cable slit.
-    jetson_y = 50.0
-    for x in (-JETSON_STANDOFF_SPACING_MM[0] / 2.0, JETSON_STANDOFF_SPACING_MM[0] / 2.0):
+    # Jetson Nano standoffs (84 × 64 mm pattern) — 8 mm tall, hanging from
+    # the top floor underside.  Board mounts in front of the motor cradle.
+    # v7.2.2: cradle is now at Y=0±25.6 (real 3D position, not the to_2D-shifted
+    # Y=-25.7 I used before).  jetson_y moved from +50 to +75 so the Jetson
+    # board's rear edge clears the cradle's front face by ≥ 9 mm.
+    jetson_y = 75.0
+    jetson_z_bottom = top_floor_underside_z - _JETSON_STANDOFF_HEIGHT_MM
+    for x in (
+        -JETSON_STANDOFF_SPACING_MM[0] / 2.0,
+        JETSON_STANDOFF_SPACING_MM[0] / 2.0,
+    ):
         for y in (
             jetson_y - JETSON_STANDOFF_SPACING_MM[1] / 2.0,
             jetson_y + JETSON_STANDOFF_SPACING_MM[1] / 2.0,
@@ -1212,19 +1290,20 @@ def _integrated_base_internal_features() -> TriangleMesh:
                     "jetson_standoff",
                     x,
                     y,
-                    z_bottom=0.0,
-                    height=top_floor_underside_z,
+                    z_bottom=jetson_z_bottom,
+                    height=_JETSON_STANDOFF_HEIGHT_MM,
                     outer_radius=4.0,
                     inner_radius=JETSON_STANDOFF_HOLE_MM / 2.0,
                 )
             )
 
-    # Waveshare ST3215 driver standoffs (58 x 23 mm hole pattern).
-    # Pushed forward to (-42, +110) so it sits in front of the Jetson without
-    # XY overlap; standoffs land at y ≈ +98.5 / +121.5, both within the
-    # cavity's y_max = +127.5 limit.
-    driver_center_x = -42.0
-    driver_center_y = 110.0
+    # Waveshare ST3215 driver standoffs (58 × 23 mm hole pattern) — 7 mm
+    # tall, hanging from the top floor.  v7.2.2: moved to BEHIND the cradle
+    # (Y = -65) so it sits in the previously-empty rear zone (Y < -25.6) and
+    # doesn't compete with the Jetson Nano up front.
+    driver_center_x = 0.0
+    driver_center_y = -65.0
+    driver_z_bottom = top_floor_underside_z - _DRIVER_STANDOFF_HEIGHT_MM
     for x in (
         driver_center_x - SERVO_DRIVER_MOUNT_HOLE_MM[0] / 2.0,
         driver_center_x + SERVO_DRIVER_MOUNT_HOLE_MM[0] / 2.0,
@@ -1238,10 +1317,30 @@ def _integrated_base_internal_features() -> TriangleMesh:
                     "servo_driver_standoff",
                     x,
                     y,
-                    z_bottom=0.0,
-                    height=top_floor_underside_z,
+                    z_bottom=driver_z_bottom,
+                    height=_DRIVER_STANDOFF_HEIGHT_MM,
                     outer_radius=3.5,
                     inner_radius=1.7,
+                )
+            )
+
+    # Pico WH standoffs (11.4 × 47 mm rotated pattern, M2 self-tap) — 7 mm
+    # tall, hanging from the top floor.  Pico stands UP on the right side of
+    # the cradle at (+45, 0).
+    pico_cx, pico_cy = PICO_CENTER_XY_MM
+    pico_hx, pico_hy = PICO_HOLE_PATTERN_MM
+    pico_z_bottom = top_floor_underside_z - _PICO_STANDOFF_HEIGHT_MM
+    for dx in (-pico_hx / 2.0, pico_hx / 2.0):
+        for dy in (-pico_hy / 2.0, pico_hy / 2.0):
+            features.extend_triangle_mesh(
+                _cylinder_ring_mesh(
+                    "pico_standoff",
+                    pico_cx + dx,
+                    pico_cy + dy,
+                    z_bottom=pico_z_bottom,
+                    height=_PICO_STANDOFF_HEIGHT_MM,
+                    outer_radius=2.0,
+                    inner_radius=PICO_STANDOFF_HOLE_MM / 2.0,
                 )
             )
 
@@ -1315,10 +1414,12 @@ def _shell_vent_slot_cutters():
     half_w_outer = INTEGRATED_BASE_OUTER_MM[0] / 2.0   # 95
     half_d_outer = INTEGRATED_BASE_OUTER_MM[1] / 2.0   # 115
 
-    # Long side walls (perpendicular to X, at x = ±95).
-    # 11 columns of slots, span y = cy ± 90, gap to case-screw boss at y = -88/118 ~= 12 mm.
+    # Long side walls (perpendicular to X, at x = ±77.5 for v7.3-C).
+    # v7.3-C: shell shrunk from 230 → 225 mm Y; long Y wall has 225 mm minus
+    # 2×18 corner radius = 189 mm straight section.  Keep 11 columns over
+    # 175 mm span (slightly narrower than 180), giving 7 mm gap to corner.
     long_y_count = 11
-    long_y_span = 180.0
+    long_y_span = 175.0
     long_y_positions = [
         cy + (i - (long_y_count - 1) / 2.0) * (long_y_span / (long_y_count - 1))
         for i in range(long_y_count)
@@ -1331,8 +1432,10 @@ def _shell_vent_slot_cutters():
                 cutters.append(box)
 
     # Front wall (sign_y = +1) — keep both vent rows.
-    short_x_count = 8
-    short_x_span = 140.0
+    # v7.3-C: shell shrunk 190 → 155 mm X; front wall straight section is
+    # 155 − 2×18 = 119 mm.  Reduce 8 cols / 140 mm → 6 cols / 100 mm to fit.
+    short_x_count = 6
+    short_x_span = 100.0
     short_x_positions = [
         (i - (short_x_count - 1) / 2.0) * (short_x_span / (short_x_count - 1))
         for i in range(short_x_count)
@@ -1421,8 +1524,8 @@ def _v6_motor_cavity_walls():
             2× M2.5 self-tap screw pilots at the back end of the STS3215;
           - front flange (30.7 × 24.7 mm) 28.3 mm forward of the motor
             centre, with 2× M2.5 pilots at the front end of the STS3215 *and*
-            a Φ21 mm daisy-chain wire pass-through that lets the cable slit
-            traffic continue down into the main cavity to the motor driver.
+            a Φ21 mm pocket that accepts the STS3215's idle (axis-alignment)
+            horn protruding from the bottom of the motor body.
       • Each screw bore is countersunk on the underside (Φ3.5 mm × 0.6 mm)
         so the M2.5 pan head sits flush — matches the original.
     """
@@ -1493,75 +1596,191 @@ def _v6_motor_cavity_walls():
         sink = sink.translate([hx, hy, floor_bottom_z - 0.1])
         floor = floor - sink
 
-    # --- Φ21 mm wire pass-through in the front flange ---
-    wire_r = MOTOR_FLOOR_WIRE_HOLE_RADIUS_MM
-    wire_y = front_cy + MOTOR_FLOOR_WIRE_HOLE_Y_OFFSET_MM
-    wire = m3.Manifold.cylinder(
-        MOTOR_FLOOR_THICKNESS_MM + 1.0, wire_r, wire_r, 48, center=False
+    # --- Φ21 idle-horn axis-alignment pocket in the front flange ---
+    horn_r = MOTOR_FLOOR_IDLE_HORN_POCKET_RADIUS_MM
+    horn_y = front_cy + MOTOR_FLOOR_IDLE_HORN_POCKET_Y_OFFSET_MM
+    horn_pocket = m3.Manifold.cylinder(
+        MOTOR_FLOOR_THICKNESS_MM + 1.0, horn_r, horn_r, 48, center=False
     )
-    wire = wire.translate([mx, wire_y, floor_bottom_z - 0.5])
-    floor = floor - wire
+    horn_pocket = horn_pocket.translate([mx, horn_y, floor_bottom_z - 0.5])
+    floor = floor - horn_pocket
+
+    # --- 4 corner alignment posts (Φ4 × 2 mm) on floor's top face ---
+    # Located inside the cradle's inner cavity at the 4 corners, INSET so
+    # they fit between the STS3215 body and the cradle walls.  The motor's
+    # bottom face touches these posts on assembly, ensuring precise XY
+    # alignment before the 4 M2.5 screws thread up from below.
+    post_r = MOTOR_CRADLE_CORNER_POST_RADIUS_MM
+    post_h = MOTOR_CRADLE_CORNER_POST_HEIGHT_MM
+    inset = MOTOR_CRADLE_CORNER_POST_INSET_MM
+    inner_w, inner_d = MOTOR_CAVITY_INNER_MM   # 24.7, 45.2
+    half_w = inner_w / 2.0 - inset
+    half_d = inner_d / 2.0 - inset
+    for sign_x in (-1.0, 1.0):
+        for sign_y in (-1.0, 1.0):
+            post = m3.Manifold.cylinder(post_h, post_r, post_r, 24, center=False)
+            post = post.translate([mx + sign_x * half_w, my + sign_y * half_d, floor_top_z])
+            floor = floor + post
+
+    # --- Rear-half ceiling shelf inside cradle interior ---
+    # A horizontal slab covering the cradle's REAR HALF interior, at the top
+    # of the cavity walls (just below the shell top).  This closes off the
+    # rear of the cradle from above so that the shell-top 24.7×45.2 mm motor
+    # pass-through only sees through the cradle's FRONT HALF (where the drive
+    # horn protrudes); the rear half stays solid.
+    shelf_inner_w, shelf_inner_d = MOTOR_CAVITY_INNER_MM    # 24.7, 45.2
+    shelf_length = MOTOR_CRADLE_REAR_SHELF_LENGTH_MM        # 22.6 (half-Y)
+    shelf_t = MOTOR_CRADLE_REAR_SHELF_THICKNESS_MM          # 2 mm
+    shelf = m3.Manifold.cube([shelf_inner_w, shelf_length, shelf_t], center=False)
+    # Place at the REAR half of the cradle interior (y < motor center).
+    shelf = shelf.translate(
+        [mx - shelf_inner_w / 2.0, my - shelf_inner_d / 2.0, cavity_top_z - shelf_t]
+    )
+    walls = walls + shelf
 
     return walls + floor
 
 
-def build_integrated_lampbase_shell() -> TriangleMesh:
-    """v6 LeLamp-style electronics shell: open bottom, closed top.
+def _load_lelamp_cradle_insert():
+    """Load the original LeLamp ``LampBase.3mf`` and crop to the cradle area.
 
-    Geometry matches the original ``LampBase.3mf`` topology, scaled up to fit
-    a Jetson Nano.  The closed top carries the rectangular motor-body
-    pass-through and daisy-chain cable slit; an internal cradle hanging from
-    the top underside holds the STS3215 base_yaw motor body so its horn
-    protrudes upward through the pass-through into the LampArm Base-Elbow's
-    open-bottom socket.  The shell's bottom is open — the cover plate slips
-    into the opening from below and bolts to the four internal case-screw
-    bosses.
+    Returns a manifold3d.Manifold containing JUST the cradle structure
+    (motor cavity walls, floor flanges with 4 M2.5 screw holes, Φ21 idle-horn
+    pocket, top motor pass-through, top cable slit, any cradle interior
+    detail features).  This is the v7 strategy: instead of trying to
+    reconstruct the cradle programmatically (which kept "drifting" from the
+    original geometry), we use the original .3mf directly — bit-identical
+    cradle, guaranteed.
 
-    Build strategy:
-      1. Use ``_hollow_rounded_box`` with ``bottom_t = TOP_THICKNESS`` to
-         produce a closed-bottom, open-top shell with the right wall geometry
-         and side-vent surface.  This gives us proven 2-manifold output.
-      2. Mirror the resulting Manifold across the XY plane (``scale [1,1,-1]``)
-         and translate by ``+outer_h`` so the closed face moves to z = outer_h
-         (the new top) and the open face moves to z = 0 (the new bottom).
-      3. Subtract the motor + cable cutouts from the new top.
-      4. Union the motor cradle walls hanging from the new top underside.
-      5. Subtract side-wall vent slots / I/O window / button holes.
-      6. Add internal posts (case-screw bosses + board standoffs).
+    The crop preserves only the central column of the LampBase
+    (X ∈ [-25, +25], Y ∈ [-55, +20]); the Pi-mount bosses, motor-driver
+    mount bosses, and outer shell walls of the original LeLamp are all
+    discarded so we can replace them with Jetson-Nano-friendly equivalents.
+
+    The result is in original LampBase coordinates (z = -4 → +36).  Callers
+    apply ``CRADLE_INSERT_Z_OFFSET_MM`` (+4) to align z=0 with the new
+    shell's open-bottom face.
     """
+    import manifold3d as m3
+    import trimesh
+
+    path = ORIGINAL_PRINT_DIR / "LampBase.3mf"
+    scene = trimesh.load(path, force="scene")
+    sub_meshes: list[trimesh.Trimesh] = []
+    for g in scene.geometry.values():
+        h = g.copy()
+        h.apply_scale(1000.0)
+        sub_meshes.append(h)
+    full = trimesh.util.concatenate(sub_meshes)
+
+    verts = np.asarray(full.vertices, dtype=np.float32)
+    tris = np.asarray(full.faces, dtype=np.uint32)
+    mesh_obj = m3.Mesh(vert_properties=verts, tri_verts=tris)
+    full_manif = m3.Manifold(mesh_obj)
+
+    crop_w = 2.0 * CRADLE_INSERT_X_HALF_MM
+    crop_d = CRADLE_INSERT_Y_MAX_MM - CRADLE_INSERT_Y_MIN_MM
+    crop_h = 50.0
+    crop_box = m3.Manifold.cube([crop_w, crop_d, crop_h], center=False)
+    crop_box = crop_box.translate(
+        [-CRADLE_INSERT_X_HALF_MM, CRADLE_INSERT_Y_MIN_MM, -5.0]
+    )
+    return m3.Manifold.batch_boolean(
+        [full_manif, crop_box], m3.OpType.Intersect
+    )
+
+
+def build_integrated_lampbase_shell() -> TriangleMesh:
+    """v7.2 LeLamp-faithful electronics shell — clean cradle handover.
+
+    The cradle is the **original LeLamp ``LampBase.3mf``** inner-cavity
+    geometry cropped wholesale (X ± 76 mm, Y -79..+104, Z full) and embedded
+    as a fixed Manifold asset — bit-identical to the upstream design.
+
+    v7.2 fixes the v7.0/7.1 mistakes:
+
+      * v7.0/7.1 cut sharp-cornered rectangular cube cutters at MISMEASURED
+        positions (the to_2D-shifted Y ≈ -25.7 and +4.9) into the new shell's
+        top slab.  In raw 3D coords those openings actually live at Y = 0
+        and Y = +30.6, and they're not sharp rectangles — the cable slit is a
+        stadium/capsule shape (123 polyline points!).
+      * v7.2 stops cutting cube openings entirely.  Instead the new shell's
+        top slab gets a large rectangular hole spanning the cradle insert's
+        XY footprint, and the cradle insert's own top slab (with its native
+        rounded openings, Φ19.2 idle pocket on bottom, all the original
+        details) fills that hole when unioned.  The two slabs are at the
+        same z (38..40), giving a flush continuous top.
+
+    Build steps:
+      1. New outer hollow shell (190 × 230 × 40 mm with 2 mm top slab).
+      2. Cut a large rectangular hole in the top slab matching the cradle
+         insert's footprint so the cradle insert's natural openings can show
+         through.
+      3. Load the cradle insert, shift it up by ``CRADLE_INSERT_Z_OFFSET_MM``
+         (+4) to align Z with the new shell.
+      4. Union with cradle insert.
+      5. Subtract side-wall vents + back I/O window + button holes.
+      6. Add minimal SHORT internal standoffs (no full-height columns —
+         original LeLamp's internal bosses are 6–8 mm tall and they come
+         along with the cradle insert).
+    """
+    import manifold3d as m3
+
     outer_w, outer_d, outer_h = INTEGRATED_BASE_OUTER_MM
+    cy_offset = INTEGRATED_BASE_Y_CENTER_MM
+    top_t = INTEGRATED_BASE_TOP_THICKNESS_MM
+    wall_t = INTEGRATED_BASE_WALL_MM
+    radius = INTEGRATED_BASE_CORNER_RADIUS_MM
+
+    # 1) Build new outer hollow shell, then mirror Z so the closed face is up.
     base_shell = _hollow_rounded_box(
         "AILamp_LampBase_Electronics_Shell",
         outer_w=outer_w,
         outer_d=outer_d,
         outer_h=outer_h,
-        wall_t=INTEGRATED_BASE_WALL_MM,
-        bottom_t=INTEGRATED_BASE_TOP_THICKNESS_MM,
-        outer_radius=INTEGRATED_BASE_CORNER_RADIUS_MM,
-        cy_offset=INTEGRATED_BASE_Y_CENTER_MM,
+        wall_t=wall_t,
+        bottom_t=top_t,
+        outer_radius=radius,
+        cy_offset=cy_offset,
         segments=ROUNDED_CORNER_SEGMENTS,
     )
-    shell_manif = _trianglemesh_to_manifold(base_shell)
-    # Flip Z so closed face is at top and open face is at bottom (matches v6
-    # install orientation).  ``scale`` with a negative factor mirrors and
-    # flips winding consistently inside manifold3d.
-    shell_manif = shell_manif.scale([1.0, 1.0, -1.0]).translate([0.0, 0.0, outer_h])
+    shell = _trianglemesh_to_manifold(base_shell)
+    shell = shell.scale([1.0, 1.0, -1.0]).translate([0.0, 0.0, outer_h])
 
-    # Top-face motor body pass-through + cable slit.
-    shell_manif = shell_manif - _v6_shell_top_cutters()
-
-    # Internal STS3215 cradle hanging from top underside.
-    shell_manif = shell_manif + _v6_motor_cavity_walls()
-
-    # Side-wall vent slots / I/O window / button holes.
-    shell_manif = shell_manif - _shell_vent_slot_cutters()
-
-    vented = _manifold_to_trianglemesh(
-        "AILamp_LampBase_Electronics_Shell", shell_manif
+    # 2) Cut a large rectangular hole through the top slab that exposes the
+    #    entire cradle-insert XY footprint, so the insert's native top (with
+    #    its rounded original openings) takes over in that region.
+    crop_w = 2.0 * CRADLE_INSERT_X_HALF_MM
+    crop_d = CRADLE_INSERT_Y_MAX_MM - CRADLE_INSERT_Y_MIN_MM
+    top_hole = m3.Manifold.cube([crop_w, crop_d, top_t + 1.0], center=False)
+    top_hole = top_hole.translate(
+        [
+            -CRADLE_INSERT_X_HALF_MM,
+            CRADLE_INSERT_Y_MIN_MM,
+            outer_h - top_t - 0.5,
+        ]
     )
-    vented.extend_triangle_mesh(_integrated_base_internal_features())
-    vented = _merge_duplicate_vertices(vented)
-    return vented
+    shell = shell - top_hole
+
+    # 3) Load original cradle insert and shift it into v7 coords.
+    cradle_insert = _load_lelamp_cradle_insert()
+    cradle_insert = cradle_insert.translate([0.0, 0.0, CRADLE_INSERT_Z_OFFSET_MM])
+
+    # 4) Union new shell with the cradle insert — the cradle insert's native
+    #    top slab fills the rectangular hole we cut, bringing its rounded
+    #    openings exactly as they are in the original LampBase.3mf.
+    shell = m3.Manifold.batch_boolean([shell, cradle_insert], m3.OpType.Add)
+
+    # 5) Subtract side-wall vents + back I/O window + button holes.
+    shell = shell - _shell_vent_slot_cutters()
+
+    # 6) Convert and add minimal SHORT internal standoffs (Jetson + driver,
+    #    8 mm and 7 mm tall respectively, hanging from the top floor — no
+    #    full-height columns).  The cover-to-shell case-screws use the
+    #    original LampBase's existing corner bosses (already in the insert).
+    tm = _manifold_to_trianglemesh("AILamp_LampBase_Electronics_Shell", shell)
+    tm.extend_triangle_mesh(_integrated_base_internal_features())
+    return _merge_duplicate_vertices(tm)
 
 
 def build_integrated_lampbase_cover() -> TriangleMesh:

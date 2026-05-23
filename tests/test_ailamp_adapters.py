@@ -135,52 +135,55 @@ def test_adapter_specs_use_loose_fit_clearances():
     )
     assert specs["AILamp_Electronics_Side_Deck"].board_pocket_mm == (145.0, 48.0)
     assert specs["AILamp_LampBase_Electronics_Shell"].outer_mm == (
-        190.0,
-        230.0,
-        42.0,
+        # v7.3-C: shrunk from 190×230 to 155×225
+        155.0,
+        225.0,
+        40.0,
     )
     # v6 cover is the bottom panel: 188×228×6 (= shell outer − 2 mm each side
     # so the cover lip slips into the shell's open bottom with registration).
-    assert generator.INTEGRATED_BASE_COVER_MM == (188.0, 228.0, 6.0)
+    assert generator.INTEGRATED_BASE_COVER_MM == (153.0, 223.0, 6.0)
     assert generator.COVER_TOTAL_THICKNESS_MM == 6.0
     assert generator.COVER_FLANGE_THICKNESS_MM == 2.0
     assert generator.COVER_LIP_HEIGHT_MM == 4.0
     # Cover's "board pocket" field is repurposed in v6 to expose the motor
     # body pass-through size (the only "hole feature" left on the assembly).
-    assert specs["AILamp_LampBase_Electronics_Cover"].board_pocket_mm == (24.8, 45.3)
+    assert specs["AILamp_LampBase_Electronics_Cover"].board_pocket_mm == (24.7, 45.2)
 
     # v6 base_yaw motor lives in the SHELL (per the original LeLamp topology).
     # Top-face features:
     assert generator.MOTOR_BODY_SIZE_MM == (24.72, 45.22, 29.0)
-    assert generator.MOTOR_PASS_THROUGH_MM == (24.8, 45.3)
+    assert generator.MOTOR_PASS_THROUGH_MM == (24.7, 45.2)
     assert generator.MOTOR_CENTER_XY_MM == (0.0, -25.7)
     assert generator.CABLE_SLIT_MM == (24.7, 10.0)
     assert generator.CABLE_SLIT_CENTER_XY_MM == (0.0, 4.9)
-    # Internal motor cavity dimensions:
-    assert generator.MOTOR_CAVITY_INNER_MM == (24.8, 45.3)
-    assert generator.MOTOR_CAVITY_OUTER_MM == (30.8, 51.3)
-    # Cavity wall height shrunk from 36 to 32 mm to make room for the 3 mm
-    # mounting floor (4 mm cover lip + 3 mm floor = walls start at z = 7).
-    assert generator.MOTOR_CAVITY_HEIGHT_MM == 32.0
-    assert generator.INTEGRATED_BASE_TOP_THICKNESS_MM == 3.0
-    # v6 cradle floor — replicates original LeLamp LampBase bottom layer:
-    # 2 mounting flanges, 4 × M2.5 screw bores, and Φ21 mm cable pass-through.
-    assert generator.MOTOR_FLOOR_THICKNESS_MM == 3.0
-    assert generator.MOTOR_FLOOR_BOTTOM_Z_MM == 4.0
-    assert generator.MOTOR_FLOOR_REAR_FLANGE_MM == (30.7, 21.0)
-    assert generator.MOTOR_FLOOR_FRONT_FLANGE_MM == (30.7, 24.7)
-    assert generator.MOTOR_FLOOR_SCREW_PILOT_RADIUS_MM == 1.25
-    assert generator.MOTOR_FLOOR_WIRE_HOLE_RADIUS_MM == 10.5
+    # v7: cradle uses original LeLamp LampBase.3mf as a fixed asset (cropped
+    # in via _load_lelamp_cradle_insert).  We just expose the top-face cutout
+    # dimensions and the z-alignment offset.
+    assert generator.INTEGRATED_BASE_TOP_THICKNESS_MM == 2.0
+    # v7.1: crop now spans the FULL inner cavity of the original LampBase
+    # (not just the cradle area) so ribs/gussets/bosses connected to the
+    # cradle and the original top-slab around the openings are preserved.
+    # v7.3-C.1: small crop, but Y_max=+38 so the cable slit (at Y=+30.6) is included
+    assert generator.CRADLE_INSERT_X_HALF_MM == 25.0
+    assert generator.CRADLE_INSERT_Y_MIN_MM == -55.0
+    assert generator.CRADLE_INSERT_Y_MAX_MM == 38.0
+    assert generator.CRADLE_INSERT_Z_OFFSET_MM == 4.0
+    # v7.3-C: Pico WH mounting constants
+    assert generator.PICO_CENTER_XY_MM == (45.0, 0.0)
+    assert generator.PICO_HOLE_PATTERN_MM == (11.4, 47.0)
+    assert generator.PICO_STANDOFF_HOLE_MM == 2.1
     assert specs["AILamp_Base_Arm_Link_Boot"].outer_mm == (74.0, 74.0, 42.0)
     assert specs["AILamp_Base_Arm_Link_Boot"].board_pocket_mm == (42.0, 48.0)
     assert generator.BASE_ARM_LINK_BOOT_MM == (74.0, 74.0, 42.0)
     assert generator.BASE_ARM_LINK_BOOT_CLEARANCE_MM == (42.0, 48.0)
     assert generator.INTEGRATED_BASE_Y_CENTER_MM == 15.0
     assert generator.INTEGRATED_BASE_CASE_SCREW_POSITIONS_MM == (
-        (-82.0, -88.0),
-        (-82.0, 118.0),
-        (82.0, -88.0),
-        (82.0, 118.0),
+        # v7.3-C: pushed to the actual shell corners
+        (-67.0, -87.0),
+        (-67.0, 117.0),
+        (67.0, -87.0),
+        (67.0, 117.0),
     )
     assert generator.INTEGRATED_BASE_CORNER_RADIUS_MM == 18.0
     assert generator.INTEGRATED_BASE_COVER_CORNER_RADIUS_MM == 16.0
