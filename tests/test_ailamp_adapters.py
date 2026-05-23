@@ -139,33 +139,38 @@ def test_adapter_specs_use_loose_fit_clearances():
         230.0,
         42.0,
     )
-    assert generator.INTEGRATED_BASE_COVER_PLATE_MM == (190.0, 230.0, 6.0)
-    assert generator.INTEGRATED_BASE_COVER_MM == (190.0, 230.0, 6.0)
-    assert generator.INTEGRATED_BASE_INTERNAL_HEIGHT_MM >= generator.JETSON_ASSEMBLY_HEIGHT_MM + 10.0
-    assert specs["AILamp_LampBase_Electronics_Cover"].board_pocket_mm == (12.0, 12.0)
-    assert generator.COVER_ARM_PASS_THROUGH_MM == (12.0, 12.0)
-    assert generator.BASE_ARM_MOUNT_OUTER_MM == (92.0, 98.0, 0.0)
-    assert generator.BASE_ARM_MOUNT_CLEARANCE_MM == (12.0, 12.0)
-    assert generator.ARM_MOUNT_SCREW_POSITIONS_MM == (
-        (0.0, -10.0),
-        (0.0, 10.0),
-        (-10.0, 0.0),
-        (10.0, 0.0),
-    )
-    assert generator.ARM_MOUNT_SCREW_CLEARANCE_RADIUS_MM == 1.25
-    assert generator.HORN_RECESS_RADIUS_MM == 12.0
-    assert generator.HORN_RECESS_DEPTH_MM == 3.0
-    assert generator.MOTOR_CRADLE_INNER_MM == (24.7, 45.3)
-    assert generator.MOTOR_CRADLE_HEIGHT_MM == 36.0
-    assert generator.SHELL_BOSS_OD_MM == 26.0
-    assert generator.SHELL_BOSS_ID_MM == 12.0
-    assert generator.SHELL_BOSS_TOP_Z_MM == 49.0
-    assert generator.BASE_ARM_MOUNT_SCREW_POSITIONS_MM == (
-        (-36.0, -40.0),
-        (-36.0, 40.0),
-        (36.0, -40.0),
-        (36.0, 40.0),
-    )
+    # v6 cover is the bottom panel: 188×228×6 (= shell outer − 2 mm each side
+    # so the cover lip slips into the shell's open bottom with registration).
+    assert generator.INTEGRATED_BASE_COVER_MM == (188.0, 228.0, 6.0)
+    assert generator.COVER_TOTAL_THICKNESS_MM == 6.0
+    assert generator.COVER_FLANGE_THICKNESS_MM == 2.0
+    assert generator.COVER_LIP_HEIGHT_MM == 4.0
+    # Cover's "board pocket" field is repurposed in v6 to expose the motor
+    # body pass-through size (the only "hole feature" left on the assembly).
+    assert specs["AILamp_LampBase_Electronics_Cover"].board_pocket_mm == (24.8, 45.3)
+
+    # v6 base_yaw motor lives in the SHELL (per the original LeLamp topology).
+    # Top-face features:
+    assert generator.MOTOR_BODY_SIZE_MM == (24.72, 45.22, 29.0)
+    assert generator.MOTOR_PASS_THROUGH_MM == (24.8, 45.3)
+    assert generator.MOTOR_CENTER_XY_MM == (0.0, -25.7)
+    assert generator.CABLE_SLIT_MM == (24.7, 10.0)
+    assert generator.CABLE_SLIT_CENTER_XY_MM == (0.0, 4.9)
+    # Internal motor cavity dimensions:
+    assert generator.MOTOR_CAVITY_INNER_MM == (24.8, 45.3)
+    assert generator.MOTOR_CAVITY_OUTER_MM == (30.8, 51.3)
+    # Cavity wall height shrunk from 36 to 32 mm to make room for the 3 mm
+    # mounting floor (4 mm cover lip + 3 mm floor = walls start at z = 7).
+    assert generator.MOTOR_CAVITY_HEIGHT_MM == 32.0
+    assert generator.INTEGRATED_BASE_TOP_THICKNESS_MM == 3.0
+    # v6 cradle floor — replicates original LeLamp LampBase bottom layer:
+    # 2 mounting flanges, 4 × M2.5 screw bores, and Φ21 mm cable pass-through.
+    assert generator.MOTOR_FLOOR_THICKNESS_MM == 3.0
+    assert generator.MOTOR_FLOOR_BOTTOM_Z_MM == 4.0
+    assert generator.MOTOR_FLOOR_REAR_FLANGE_MM == (30.7, 21.0)
+    assert generator.MOTOR_FLOOR_FRONT_FLANGE_MM == (30.7, 24.7)
+    assert generator.MOTOR_FLOOR_SCREW_PILOT_RADIUS_MM == 1.25
+    assert generator.MOTOR_FLOOR_WIRE_HOLE_RADIUS_MM == 10.5
     assert specs["AILamp_Base_Arm_Link_Boot"].outer_mm == (74.0, 74.0, 42.0)
     assert specs["AILamp_Base_Arm_Link_Boot"].board_pocket_mm == (42.0, 48.0)
     assert generator.BASE_ARM_LINK_BOOT_MM == (74.0, 74.0, 42.0)
