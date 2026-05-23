@@ -20,6 +20,16 @@ hardware = [
     "sounddevice>=0.5",
     "ultralytics>=8.0",
 ]
+nano = [
+    "numpy>=1.26",
+    "opencv-python-headless>=4.9",
+    "openai>=2.35.0",
+    "pyserial>=3.5",
+    "python-dotenv>=1.0",
+    "sounddevice>=0.5",
+    "livekit-agents[openai]>=1.2",
+    "livekit-plugins-noise-cancellation>=0.2",
+]
 simulation = [
     "mujoco>=3.2",
     "glfw>=2.7",

@@ -1,4 +1,5 @@
 from pathlib import Path
+import tomllib
 
 from ailamp.config import load_hardware_config
 
@@ -44,6 +45,23 @@ def test_loads_camera_path_and_pixel_format():
     assert config.camera.pixel_format == "MJPG"
 
 
+def test_loads_jetson_nano_api_hybrid_profile():
+    config = load_hardware_config(Path("config/hardware.jetson-nano.toml"))
+
+    assert config.controller.model == "NVIDIA Jetson Nano Developer Kit 4GB"
+    assert config.controller.mpn == "945-13450-0000-100"
+    assert config.camera.width == 640
+    assert config.camera.height == 480
+    assert config.camera.fps == 15
+    assert config.vision.backend == "api_hybrid"
+    assert config.vision.pose_enabled is False
+    assert config.vision.api_enabled is True
+    assert config.vision.api_model == "gpt-4.1-mini"
+    assert config.vision.api_interval_s == 1.0
+    assert config.vision.api_image_max_px == 512
+    assert config.runtime.vision_interval_s == 0.2
+
+
 def test_hardware_bom_quantities_are_complete():
     from ailamp.hardware_check import EXPECTED_BOM_QUANTITIES
 
@@ -51,3 +69,11 @@ def test_hardware_bom_quantities_are_complete():
 
     assert set(config.hardware_bom) == set(EXPECTED_BOM_QUANTITIES)
     assert {key: item.quantity for key, item in config.hardware_bom.items()} == EXPECTED_BOM_QUANTITIES
+
+
+def test_nano_extra_includes_voice_and_responses_api_dependencies():
+    raw = tomllib.loads(Path("pyproject.toml").read_text())
+    nano_deps = raw["project"]["optional-dependencies"]["nano"]
+
+    assert "livekit-plugins-noise-cancellation>=0.2" in nano_deps
+    assert "openai>=2.35.0" in nano_deps

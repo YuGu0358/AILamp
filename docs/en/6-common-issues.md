@@ -10,6 +10,19 @@ ls /dev/ttyACM* /dev/ttyUSB* /dev/video*
 
 Update `config/hardware.toml`.
 
+For Jetson Nano, update `config/hardware.jetson-nano.toml` and rerun:
+
+```bash
+ailamp --config config/hardware.jetson-nano.toml runtime-check --include-devices
+```
+
+## Runtime Check Fails
+
+- Missing `OPENAI_API_KEY`: export it before Nano API-hybrid vision.
+- Missing LiveKit/OpenAI packages: reinstall with `pip install -e ".[nano]"`.
+- Missing LeLamp motor runtime: install the sibling `lelamp_runtime` package before real ST3215 playback.
+- `outputs/` not writable: fix project permissions before running `vision-loop`.
+
 ## LED Does Not Light
 
 - Check `GST60A05-P1J` output.
@@ -31,3 +44,8 @@ Update `config/hardware.toml`.
 - Reduce resolution to 640x480.
 - Check Arducam UB0234 USB cable.
 
+## Simulation Check Fails
+
+- Run `ailamp sim-check` before opening the viewer.
+- If actuator mapping fails, inspect `simulation/robot.xml` before running recordings.
+- If render fails, install the simulation extra with `pip install -e ".[simulation]"`.

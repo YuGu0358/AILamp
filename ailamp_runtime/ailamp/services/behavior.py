@@ -17,6 +17,9 @@ DEFAULT_BEHAVIOR_MAP: dict[VisionEventType, tuple[str, tuple[int, int, int]]] = 
     VisionEventType.GESTURE_DOWN: ("idle", (180, 220, 255)),
     VisionEventType.POSTURE_STUDYING: ("idle", (255, 235, 190)),
     VisionEventType.LOOKING_AT_LAMP: ("nod", (255, 210, 130)),
+    VisionEventType.EXPRESSION_SMILE: ("happy_wiggle", (255, 210, 130)),
+    VisionEventType.EXPRESSION_TIRED: ("idle", (255, 235, 190)),
+    VisionEventType.EXPRESSION_NEUTRAL: ("idle", (180, 220, 255)),
 }
 
 
