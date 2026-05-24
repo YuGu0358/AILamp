@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 import csv
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -77,11 +81,13 @@ class MotorService:
 
         self._animation_service = AnimationService(port=self.port, lamp_id=self.lamp_id)
         self._animation_service.start()
+        logger.info("MotorService connected: port=%s lamp_id=%s", self.port, self.lamp_id)
 
     def close(self) -> None:
         if self._animation_service is not None:
             self._animation_service.stop()
             self._animation_service = None
+            logger.info("MotorService closed")
 
     def play(self, recording_name: str) -> None:
         if self._animation_service is None:

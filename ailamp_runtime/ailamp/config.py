@@ -135,6 +135,13 @@ class SimulationConfig:
 
 
 @dataclass(frozen=True)
+class BehaviorEntry:
+    """One row of the [behavior_map] config: motion CSV name + LED RGB."""
+    motion: str
+    rgb: tuple[int, int, int]
+
+
+@dataclass(frozen=True)
 class HardwareConfig:
     system: SystemConfig
     controller: ControllerConfig
@@ -149,6 +156,7 @@ class HardwareConfig:
     birthday: BirthdayConfig
     simulation: SimulationConfig
     hardware_bom: dict[str, BOMItem]
+    behavior_map: dict[str, BehaviorEntry] | None = None
 
 
 def _resolve_config_path(path: str | Path) -> Path:
@@ -175,6 +183,12 @@ def load_hardware_config(path: str | Path) -> HardwareConfig:
     }
     vision_raw.update(raw["vision"])
 
+    behavior_map_raw = raw.get("behavior_map") or {}
+    behavior_map = {
+        event_key: BehaviorEntry(motion=str(entry["motion"]), rgb=tuple(int(c) for c in entry["rgb"]))
+        for event_key, entry in behavior_map_raw.items()
+    } or None
+
     return HardwareConfig(
         system=SystemConfig(**raw["system"]),
         controller=ControllerConfig(**raw["controller"]),
@@ -198,4 +212,5 @@ def load_hardware_config(path: str | Path) -> HardwareConfig:
         ),
         simulation=SimulationConfig(**raw["simulation"]),
         hardware_bom={key: BOMItem(**value) for key, value in raw["hardware_bom"].items()},
+        behavior_map=behavior_map,
     )

@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timezone
 import json
+import logging
 from pathlib import Path
 import tempfile
 import time
@@ -19,6 +20,15 @@ from ailamp.services.led_serial import LEDSerialService
 from ailamp.services.motor import JointDeltaCommand, MotorService
 from ailamp.services.pose_gesture import PoseDetectorService, classify_pose_gesture
 from ailamp.services.vision import DetectorService, classify_person_position
+
+
+logger = logging.getLogger(__name__)
+
+
+# Errors classified as transient (camera lost a frame, USB hiccup, etc.) — retry with backoff.
+# Anything else propagates immediately so the operator sees the real failure.
+_TRANSIENT_EXCEPTIONS: tuple[type[BaseException], ...] = (OSError, TimeoutError, ConnectionError)
+_DEFAULT_RETRY_DELAYS_S: tuple[float, ...] = (0.05, 0.2, 0.5)
 
 
 def _utc_now() -> str:
@@ -193,6 +203,7 @@ class VisionRuntime:
         pose_detector: object | None = None,
         api_vision: object | None = None,
         clock: Callable[[], float] = time.monotonic,
+        retry_delays_s: tuple[float, ...] = _DEFAULT_RETRY_DELAYS_S,
     ):
         self.config = config
         self.backend = config.vision.backend
@@ -228,6 +239,9 @@ class VisionRuntime:
         self._last_applied_event: VisionEventType | None = None
         self._last_applied_time = -1_000_000.0
         self._last_seen_person = False
+        self._retry_delays_s = retry_delays_s
+        self.errors_total = 0
+        self.last_error: str | None = None
 
     def open(self, *, with_outputs: bool = False) -> None:
         self.camera.open()
@@ -263,6 +277,48 @@ class VisionRuntime:
         self.camera.close()
 
     def step(self, *, apply_outputs: bool = False) -> VisionLoopResult:
+        """Run a supervised step: transient IO errors retry with backoff and emit a NO_PERSON snapshot."""
+        attempts = (None,) + self._retry_delays_s
+        last_exc: BaseException | None = None
+        for delay in attempts:
+            if delay is not None:
+                time.sleep(delay)
+            try:
+                return self._step_unsafe(apply_outputs=apply_outputs)
+            except _TRANSIENT_EXCEPTIONS as exc:
+                last_exc = exc
+                self.errors_total += 1
+                self.last_error = f"{type(exc).__name__}: {exc}"
+                logger.warning(
+                    "VisionRuntime.step transient error frame=%d attempt_delay=%s err=%s",
+                    self._frame_index, delay, self.last_error,
+                )
+                continue
+        # All retries exhausted — surface a NO_PERSON snapshot tagged with the error so the
+        # state file reflects degraded health, then keep the loop alive.
+        logger.error(
+            "VisionRuntime.step gave up after %d retries frame=%d err=%s",
+            len(self._retry_delays_s), self._frame_index, self.last_error,
+        )
+        event = VisionEvent(VisionEventType.NO_PERSON, semantic_reason=f"step_error:{self.last_error}")
+        decision = AIDecision(
+            event=event, motion="idle", rgb=(30, 30, 80),
+            reason=f"step_error:{self.last_error}",
+            semantic_reason=event.semantic_reason,
+        )
+        action = BehaviorAction(event=event, motion=decision.motion, rgb=decision.rgb)
+        snapshot = VisionSnapshot(
+            event=event, action=action, updated_at=_utc_now(),
+            frame_index=self._frame_index, decision=decision,
+        )
+        try:
+            self.state_store.write(snapshot)
+        except OSError as state_exc:
+            logger.warning("failed to write degraded state snapshot: %s", state_exc)
+        self._frame_index += 1
+        return VisionLoopResult(snapshot=snapshot, applied=False)
+
+    def _step_unsafe(self, *, apply_outputs: bool = False) -> VisionLoopResult:
         frame = self.camera.read()
         if self.backend == "api_hybrid":
             if self.api_vision is None:

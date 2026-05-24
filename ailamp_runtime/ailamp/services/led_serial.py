@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from typing import Iterable, Optional
+
+
+logger = logging.getLogger(__name__)
 
 
 RGB = tuple[int, int, int]
@@ -53,11 +57,13 @@ class LEDSerialService:
         import serial  # type: ignore
 
         self._serial = serial.Serial(self.port, self.baudrate, timeout=self.timeout)
+        logger.info("LEDSerialService connected: port=%s baud=%d", self.port, self.baudrate)
 
     def close(self) -> None:
         if self._serial is not None:
             self._serial.close()
             self._serial = None
+            logger.info("LEDSerialService closed")
 
     def send(self, command: bytes) -> str:
         if self._serial is None:

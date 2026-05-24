@@ -79,6 +79,72 @@ vision_state_file = "outputs/vision_state.json"
 vision_interval_s = 0.2
 action_cooldown_s = 1.5
 
+# Behavior table — maps each vision event to a CSV recording name and RGB light color.
+# Edit this section to retune behavior without touching Python code.
+[behavior_map.no_person]
+motion = "scanning"
+rgb = [30, 30, 80]
+
+[behavior_map.person_left]
+motion = "headshake"
+rgb = [80, 120, 255]
+
+[behavior_map.person_center]
+motion = "nod"
+rgb = [255, 180, 80]
+
+[behavior_map.person_right]
+motion = "scanning"
+rgb = [80, 120, 255]
+
+[behavior_map.person_close]
+motion = "shy"
+rgb = [255, 80, 120]
+
+[behavior_map.person_far]
+motion = "curious"
+rgb = [80, 255, 160]
+
+[behavior_map.person_left_seat]
+motion = "idle"
+rgb = [30, 30, 80]
+
+[behavior_map.gesture_left]
+motion = "headshake"
+rgb = [90, 150, 255]
+
+[behavior_map.gesture_right]
+motion = "scanning"
+rgb = [90, 150, 255]
+
+[behavior_map.gesture_up]
+motion = "curious"
+rgb = [180, 220, 255]
+
+[behavior_map.gesture_down]
+motion = "idle"
+rgb = [180, 220, 255]
+
+[behavior_map.posture_studying]
+motion = "idle"
+rgb = [255, 235, 190]
+
+[behavior_map.looking_at_lamp]
+motion = "nod"
+rgb = [255, 210, 130]
+
+[behavior_map.expression_smile]
+motion = "happy_wiggle"
+rgb = [255, 210, 130]
+
+[behavior_map.expression_tired]
+motion = "idle"
+rgb = [255, 235, 190]
+
+[behavior_map.expression_neutral]
+motion = "idle"
+rgb = [180, 220, 255]
+
 [birthday]
 enabled = true
 month = 5
