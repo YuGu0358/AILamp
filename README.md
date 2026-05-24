@@ -7,7 +7,7 @@
 [![Simulation: MuJoCo](https://img.shields.io/badge/simulation-MuJoCo-orange.svg)](simulation/ailamp_scene.xml)
 [![Voice: LiveKit + OpenAI](https://img.shields.io/badge/voice-LiveKit%20%2B%20OpenAI-purple.svg)](ailamp_runtime/ailamp/agent/livekit_agent.py)
 
-![AILamp MuJoCo perspective](docs/img/cover.png)
+![AILamp v7.3-C.1 integrated electronics base — four-view](docs/img/v7.3-C.1-base-fourview.png)
 
 AILamp is a Jetson-based interactive robotic lamp built from the LeLamp mechanical and motion foundation. It integrates MuJoCo simulation, virtual vision, local person detection, ST3215 servo control, Pico WH LED control, USB audio, and OpenAI/LiveKit voice interaction.
 

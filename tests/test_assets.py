@@ -17,7 +17,6 @@ def test_required_assets_and_recordings_are_present():
     simulation_adapter_dir = root / "simulation/assets/ailamp_adapters"
     assert (adapter_dir / "AILamp_LampBase_Electronics_Shell.3mf").exists()
     assert (adapter_dir / "AILamp_LampBase_Electronics_Cover.3mf").exists()
-    assert (adapter_dir / "AILamp_Base_Arm_Link_Boot.3mf").exists()
     assert (adapter_dir / "AILamp_Jetson_Nano_Base_Tray.3mf").exists()
     assert (adapter_dir / "AILamp_Electronics_Side_Deck.3mf").exists()
     assert (adapter_dir / "AILamp_Cable_Clip_6mm.3mf").exists()

@@ -99,8 +99,6 @@ MOTOR_CRADLE_CORNER_POST_RADIUS_MM = 2.0   # Φ4
 MOTOR_CRADLE_CORNER_POST_HEIGHT_MM = 2.0   # 2 mm protrusion
 MOTOR_CRADLE_CORNER_POST_INSET_MM = 3.0    # inset from cradle outer corners
 
-BASE_ARM_LINK_BOOT_MM = (74.0, 74.0, 42.0)
-BASE_ARM_LINK_BOOT_CLEARANCE_MM = (42.0, 48.0)
 # v7.3-C: shrunk from 190×230 to 155×225 (-35 × -5 mm, ~28% volume savings).
 # Z stays 40 mm to match the original LampBase cradle's horn-protrusion height.
 INTEGRATED_BASE_OUTER_MM = (155.0, 225.0, 40.0)
@@ -166,8 +164,6 @@ CORE_NAMESPACE = "http://schemas.microsoft.com/3dmanufacturing/core/2015/02"
 FIXED_ZIP_TIMESTAMP = (2026, 1, 1, 0, 0, 0)
 ELECTRONICS_SIDE_DECK_WIRING_ALLOWANCE_MM = (26.0, 15.0)
 ROUNDED_CORNER_SEGMENTS = 24
-BASE_ARM_LINK_BOOT_CORNER_RADIUS_MM = 37.0
-BASE_ARM_LINK_BOOT_INNER_CORNER_RADIUS_MM = 6.0
 COVER_CASE_SCREW_CLEARANCE_RADIUS_MM = 2.4
 
 
@@ -215,12 +211,6 @@ def adapter_specs() -> list[AdapterSpec]:
             INTEGRATED_BASE_COVER_MM,
             MOTOR_PASS_THROUGH_MM,
             "Bottom panel for the LampBase shell — 6 mm flat plate (4 mm lip + 2 mm flange) with 4 corner case-screw bores",
-        ),
-        AdapterSpec(
-            "AILamp_Base_Arm_Link_Boot",
-            BASE_ARM_LINK_BOOT_MM,
-            BASE_ARM_LINK_BOOT_CLEARANCE_MM,
-            "Moving base-arm link boot that bridges the fixed cover collar to the arm root",
         ),
         AdapterSpec(
             "AILamp_Jetson_Nano_Base_Tray",
@@ -883,101 +873,6 @@ def _lofted_wall(
             triangles.append((i, j + n, j))
             triangles.append((i, i + n, j + n))
     return TriangleMesh(name, vertices, triangles)
-
-
-def _tapered_rounded_collar(
-    name: str,
-    bottom_outer_w: float,
-    bottom_outer_d: float,
-    bottom_outer_radius: float,
-    top_outer_w: float,
-    top_outer_d: float,
-    top_outer_radius: float,
-    inner_w: float,
-    inner_d: float,
-    inner_radius: float,
-    height: float,
-    z_bottom: float,
-    segments: int = ROUNDED_CORNER_SEGMENTS,
-    include_inner_wall: bool = True,
-    include_bottom_annulus: bool = True,
-) -> TriangleMesh:
-    """Closed frame whose outer wall lofts from one rounded rectangle to another.
-
-    Use this to taper the cover's arm-mount collar from its rectangular cover
-    footprint (92 x 98 mm at the cover plate) down to a circle that matches
-    the cylindrical boot diameter (Φ74 mm at the collar top).
-
-    Pass ``include_bottom_annulus=False`` when the collar sits on top of a
-    plate that already provides the +z-facing surface around the collar's
-    outer perimeter; this avoids the doubled coincident face at ``z_bottom``
-    that would otherwise create 4-triangles-per-edge non-manifoldness if a
-    boolean subtract later punches holes through the junction.
-    """
-    bottom_outer = _rounded_rect_polygon(
-        bottom_outer_w, bottom_outer_d, bottom_outer_radius, segments
-    )
-    top_outer = _rounded_rect_polygon(top_outer_w, top_outer_d, top_outer_radius, segments)
-    inner_poly = _rounded_rect_polygon(inner_w, inner_d, inner_radius, segments)
-    z_top = z_bottom + height
-
-    mesh = TriangleMesh(name)
-    if include_bottom_annulus:
-        # Bottom annulus from bottom outer to inner perimeter (facing -z).
-        mesh.extend_triangle_mesh(
-            _annular_strip(name + "_bottom", bottom_outer, inner_poly, z_bottom, facing_up=False)
-        )
-    # Top annulus from top outer to inner perimeter (facing +z).
-    mesh.extend_triangle_mesh(
-        _annular_strip(name + "_top", top_outer, inner_poly, z_top, facing_up=True)
-    )
-    # Outer wall: lofts from bottom_outer to top_outer.
-    mesh.extend_triangle_mesh(
-        _lofted_wall(name + "_outer", bottom_outer, z_bottom, top_outer, z_top, outward=True)
-    )
-    if include_inner_wall:
-        # Inner wall: straight extrusion of the inner polygon.
-        mesh.extend_triangle_mesh(
-            _extruded_wall(name + "_inner", inner_poly, z_bottom, z_top, outward=False)
-        )
-    return mesh
-
-
-def _rounded_collar(
-    name: str,
-    outer_w: float,
-    outer_d: float,
-    inner_w: float,
-    inner_d: float,
-    height: float,
-    z_bottom: float,
-    outer_radius: float,
-    inner_radius: float,
-    segments: int = ROUNDED_CORNER_SEGMENTS,
-    cy_offset: float = 0.0,
-) -> TriangleMesh:
-    """Closed rounded-rectangle frame (collar) of given outer/inner footprint and height."""
-    outer_pts = _rounded_rect_polygon(outer_w, outer_d, outer_radius, segments, cy=cy_offset)
-    inner_pts = _rounded_rect_polygon(inner_w, inner_d, inner_radius, segments, cy=cy_offset)
-    z_top = z_bottom + height
-    mesh = TriangleMesh(name)
-    # Bottom annulus (facing -z).
-    mesh.extend_triangle_mesh(
-        _annular_strip(name + "_bot", outer_pts, inner_pts, z_bottom, facing_up=False)
-    )
-    # Top annulus (facing +z).
-    mesh.extend_triangle_mesh(
-        _annular_strip(name + "_top", outer_pts, inner_pts, z_top, facing_up=True)
-    )
-    # Outer wall.
-    mesh.extend_triangle_mesh(
-        _extruded_wall(name + "_outer", outer_pts, z_bottom, z_top, outward=True)
-    )
-    # Inner wall (faces into the collar opening).
-    mesh.extend_triangle_mesh(
-        _extruded_wall(name + "_inner", inner_pts, z_bottom, z_top, outward=False)
-    )
-    return mesh
 
 
 def _solid_cylinder_with_hole(
@@ -1868,31 +1763,6 @@ def build_integrated_lampbase_cover() -> TriangleMesh:
     return cover
 
 
-def build_base_arm_link_boot() -> TriangleMesh:
-    """Rounded-rectangle boot that bridges the cover collar to the arm root.
-
-    Implemented as a single closed rounded tube (outer/inner rounded
-    rectangles capped with annular top and bottom faces).  This is smoother
-    than the previous box-stack frame and visually matches the new cover
-    collar instead of a square box approximation.
-    """
-    outer_w, outer_d, outer_h = BASE_ARM_LINK_BOOT_MM
-    inner_w, inner_d = BASE_ARM_LINK_BOOT_CLEARANCE_MM
-    boot = _rounded_collar(
-        "AILamp_Base_Arm_Link_Boot",
-        outer_w=outer_w,
-        outer_d=outer_d,
-        inner_w=inner_w,
-        inner_d=inner_d,
-        height=outer_h,
-        z_bottom=0.0,
-        outer_radius=BASE_ARM_LINK_BOOT_CORNER_RADIUS_MM,
-        inner_radius=BASE_ARM_LINK_BOOT_INNER_CORNER_RADIUS_MM,
-        segments=ROUNDED_CORNER_SEGMENTS,
-    )
-    return boot
-
-
 def build_jetson_tray() -> Mesh:
     mesh = Mesh("AILamp_Jetson_Nano_Base_Tray")
     outer = (122.0, 102.0, 12.0)
@@ -1954,7 +1824,6 @@ def generate_all(output_dir: Path | str = Path("3D/AILamp_Adapters")) -> list[Pa
     builders = {
         "AILamp_LampBase_Electronics_Shell": build_integrated_lampbase_shell,
         "AILamp_LampBase_Electronics_Cover": build_integrated_lampbase_cover,
-        "AILamp_Base_Arm_Link_Boot": build_base_arm_link_boot,
         "AILamp_Jetson_Nano_Base_Tray": build_jetson_tray,
         "AILamp_Electronics_Side_Deck": build_electronics_side_deck,
         "AILamp_Cable_Clip_6mm": lambda: build_cable_clip(

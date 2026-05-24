@@ -90,7 +90,6 @@
           <geom type="mesh" class="visual" pos="0.0239153 0.00893702 -0.03245" quat="0.417203 0.417203 0.570913 0.570913" mesh="motor_1723_3" material="motor_1723_3_material" />
           <geom type="mesh" class="collision" pos="0.0239153 0.00893702 -0.03245" quat="0.417203 0.417203 0.570913 0.570913" mesh="motor_1723_3" material="motor_1723_3_material" />
           <site group="3" name="imu_site" pos="-3.4944e-17 4.02192e-17 -0.0378" quat="1.81174e-15 -0.590014 -0.807393 -2.8812e-15" />
-          <geom name="ailamp_base_arm_link_boot_visual" type="mesh" class="visual" pos="0.0119093 0.0037971 -0.0378" quat="0.590014 2.41506e-15 -1.88738e-15 0.807393" mesh="ailamp_base_arm_link_boot_mesh" material="ailamp_cover_gray" contype="0" conaffinity="0" />
         </body>
       </body>
       <body name="lamparm__elbow_wrist" pos="0.105806 -0.0129789 0.301237" quat="0.575614 0.423658 -0.566139 0.410693">
@@ -178,7 +177,6 @@
     <material name="lamparm__elbow_wrist_material" rgba="0.301961 0.301961 0.301961 1" />
     <material name="diffuser_material" rgba="0.647059 0.647059 0.647059 1" />
     <material name="lamphead_material" rgba="0.301961 0.301961 0.301961 1" />
-    <mesh name="ailamp_base_arm_link_boot_mesh" file="ailamp_adapters/AILamp_Base_Arm_Link_Boot.stl" scale="0.001 0.001 0.001" />
   </asset>
   <actuator>
     <position class="sts3215" name="2" joint="2" inheritrange="1" />

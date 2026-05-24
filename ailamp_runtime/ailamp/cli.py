@@ -34,7 +34,6 @@ SIM_CHECK_RECORDINGS = ["wake_up", "idle", "nod", "scanning", "shy"]
 SIM_CHECK_ADAPTER_VISUALS = [
     "ailamp_integrated_base_shell_visual",
     "ailamp_integrated_base_cover_visual",
-    "ailamp_base_arm_link_boot_visual",
     "ailamp_cable_clip_6mm_visual",
     "ailamp_cable_clip_10mm_visual",
 ]

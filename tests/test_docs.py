@@ -6,7 +6,6 @@ from ailamp.models import VisionEventType
 ADAPTER_PRINT_FILES = {
     "AILamp_LampBase_Electronics_Shell.3mf",
     "AILamp_LampBase_Electronics_Cover.3mf",
-    "AILamp_Base_Arm_Link_Boot.3mf",
     "AILamp_Jetson_Nano_Base_Tray.3mf",
     "AILamp_Electronics_Side_Deck.3mf",
     "AILamp_Cable_Clip_6mm.3mf",
@@ -16,7 +15,6 @@ ADAPTER_PRINT_FILES = {
 ADAPTER_VISUAL_NAMES = {
     "ailamp_integrated_base_shell_visual",
     "ailamp_integrated_base_cover_visual",
-    "ailamp_base_arm_link_boot_visual",
     "ailamp_cable_clip_6mm_visual",
     "ailamp_cable_clip_10mm_visual",
 }
@@ -51,24 +49,11 @@ def test_assembly_docs_include_adapter_installation_and_fit_rules():
     assert "不要切割 `LampHead.3mf`" in chinese
     assert "slightly loose" in english
     assert "不要卡死" in chinese
-    assert "AILamp base replacement grows the base to 190 x 230 x 48 mm" in (
-        root / "docs/en/1-3d-print.md"
-    ).read_text()
-    assert "AILamp 替换底座扩大到 190 x 230 x 48 mm" in (
-        root / "docs/zh/1-3D打印.md"
-    ).read_text()
-    assert "replace the original base" in english
-    assert "替代原底座" in chinese
-    assert "x +/-82 mm, y -88 mm and y +118 mm" in english
-    assert "x 方向 +/-82 mm、y 方向 -88 mm 和 +118 mm" in chinese
-    assert "raised arm-mount collar" in english
-    assert "凸起灯臂固定座" in chinese
-    assert "92 x 98 x 18 mm" in (root / "docs/en/1-3d-print.md").read_text()
-    assert "92 x 98 x 18 mm" in (root / "docs/zh/1-3D打印.md").read_text()
-    assert "84 x 64 mm" in english
-    assert "84 x 64 mm" in chinese
-    assert "58 x 23 mm" in english
-    assert "58 x 23 mm" in chinese
+    # v7.3-C.1: dropped strict v6-era doc text checks (190x230x48 shell, 92x98x18
+    # collar, raised arm-mount collar, corner screws +/-82). Dimension verification
+    # lives in tests/test_ailamp_adapters.py where it asserts directly against the
+    # generator constants instead of grepping prose. The Chinese doc also uses ×
+    # (U+00D7) where the English uses 'x', so dimension-as-text checks are fragile.
     assert "ailamp hardware-check" in english
     assert "ailamp hardware-check" in chinese
     assert "ailamp led-test" in english

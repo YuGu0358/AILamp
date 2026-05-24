@@ -173,10 +173,11 @@ def test_adapter_specs_use_loose_fit_clearances():
     assert generator.PICO_CENTER_XY_MM == (45.0, 0.0)
     assert generator.PICO_HOLE_PATTERN_MM == (11.4, 47.0)
     assert generator.PICO_STANDOFF_HOLE_MM == 2.1
-    assert specs["AILamp_Base_Arm_Link_Boot"].outer_mm == (74.0, 74.0, 42.0)
-    assert specs["AILamp_Base_Arm_Link_Boot"].board_pocket_mm == (42.0, 48.0)
-    assert generator.BASE_ARM_LINK_BOOT_MM == (74.0, 74.0, 42.0)
-    assert generator.BASE_ARM_LINK_BOOT_CLEARANCE_MM == (42.0, 48.0)
+    # v7.3-C.1: AILamp_Base_Arm_Link_Boot removed — original LampArm (Base-Elbow).3mf
+    # already provides the rotating shroud above the cradle/cover, no AILamp adapter needed.
+    assert "AILamp_Base_Arm_Link_Boot" not in specs
+    assert not hasattr(generator, "BASE_ARM_LINK_BOOT_MM")
+    assert not hasattr(generator, "build_base_arm_link_boot")
     assert generator.INTEGRATED_BASE_Y_CENTER_MM == 15.0
     assert generator.INTEGRATED_BASE_CASE_SCREW_POSITIONS_MM == (
         # v7.3-C: pushed to the actual shell corners
@@ -204,7 +205,6 @@ def test_generator_writes_all_adapter_files_without_touching_originals(tmp_path)
     expected_adapter_names = {
         "AILamp_LampBase_Electronics_Shell",
         "AILamp_LampBase_Electronics_Cover",
-        "AILamp_Base_Arm_Link_Boot",
         "AILamp_Jetson_Nano_Base_Tray",
         "AILamp_Electronics_Side_Deck",
         "AILamp_Cable_Clip_6mm",
