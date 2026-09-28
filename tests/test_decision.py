@@ -17,6 +17,28 @@ def test_decision_tracks_person_left_and_right_with_base_yaw_delta():
     assert right.joint_deltas[0].delta_deg > 0
 
 
+def test_decision_treats_zero_offset_as_inside_deadzone():
+    service = DecisionService()
+
+    decision = service.decide(VisionEvent(VisionEventType.PERSON_LEFT, normalized_offset=0.0))
+
+    assert not decision.joint_deltas
+
+
+def test_decision_uses_direction_default_when_offset_is_missing():
+    service = DecisionService()
+
+    left_event = VisionEvent(VisionEventType.PERSON_LEFT)
+    right_event = VisionEvent(VisionEventType.PERSON_RIGHT)
+    left = service.decide(left_event)
+    right = service.decide(right_event)
+
+    assert left_event.normalized_offset is None
+    assert right_event.normalized_offset is None
+    assert left.joint_deltas[0].delta_deg == -service.yaw_step_deg
+    assert right.joint_deltas[0].delta_deg == service.yaw_step_deg
+
+
 def test_decision_tilts_head_for_close_and_far_person():
     service = DecisionService()
 

@@ -496,7 +496,7 @@ def build_parser() -> argparse.ArgumentParser:
         default=VisionEventType.PERSON_CENTER.value,
     )
     agent_tools.add_argument("--confidence", type=float, default=0.9)
-    agent_tools.add_argument("--offset", type=float, default=0.0, help="Normalized horizontal person offset, -1 left to +1 right")
+    agent_tools.add_argument("--offset", type=float, default=None, help="Normalized horizontal person offset, -1 left to +1 right")
     agent_tools.add_argument("--area-ratio", type=float, default=0.0, help="Detected person bbox area ratio")
     agent_tools.add_argument("--request", default=None, help="Optional voice/user request to feed the AI decision layer")
     agent_tools.add_argument("--apply", action="store_true", help="Apply mapped behavior through the toolbox")

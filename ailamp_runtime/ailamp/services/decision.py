@@ -76,11 +76,11 @@ class DecisionService:
 
     def _tracking_deltas(self, event: VisionEvent) -> tuple[JointDeltaCommand, ...]:
         if event.event_type in {VisionEventType.PERSON_LEFT, VisionEventType.GESTURE_LEFT}:
-            offset = event.normalized_offset if event.normalized_offset else -1.0
+            offset = event.normalized_offset if event.normalized_offset is not None else -1.0
             if offset < -self.yaw_deadzone:
                 return (JointDeltaCommand("base_yaw", -self._scaled_yaw_step(offset)),)
         if event.event_type in {VisionEventType.PERSON_RIGHT, VisionEventType.GESTURE_RIGHT}:
-            offset = event.normalized_offset if event.normalized_offset else 1.0
+            offset = event.normalized_offset if event.normalized_offset is not None else 1.0
             if offset > self.yaw_deadzone:
                 return (JointDeltaCommand("base_yaw", self._scaled_yaw_step(offset)),)
         if event.event_type == VisionEventType.PERSON_CLOSE:
