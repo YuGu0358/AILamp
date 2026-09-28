@@ -104,11 +104,12 @@ class VisionSnapshot:
     @classmethod
     def from_dict(cls, raw: dict) -> VisionSnapshot:
         event_raw = raw["event"]
+        normalized_offset = event_raw.get("normalized_offset")
         event = VisionEvent(
             event_type=VisionEventType(event_raw["event_type"]),
             confidence=float(event_raw.get("confidence", 0.0)),
             bbox=_bbox_from_dict(event_raw.get("bbox")),
-            normalized_offset=float(event_raw.get("normalized_offset", 0.0)),
+            normalized_offset=float(normalized_offset) if normalized_offset is not None else None,
             area_ratio=float(event_raw.get("area_ratio", 0.0)),
             semantic_reason=str(event_raw.get("semantic_reason", "")),
         )

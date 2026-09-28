@@ -101,6 +101,7 @@ class APIVisionService:
 
     def _event_from_text(self, text: str) -> VisionEvent:
         raw = json.loads(_json_object_text(text))
+        normalized_offset = raw.get("normalized_offset")
         raw_event_type = str(raw.get("event_type", VisionEventType.NO_PERSON.value))
         event_type = VisionEventType._value2member_map_.get(raw_event_type)
         if event_type is None or event_type not in SUPPORTED_API_EVENTS:
@@ -111,7 +112,7 @@ class APIVisionService:
         return VisionEvent(
             event_type=event_type,
             confidence=confidence,
-            normalized_offset=float(raw.get("normalized_offset", 0.0)),
+            normalized_offset=float(normalized_offset) if normalized_offset is not None else None,
             area_ratio=float(raw.get("area_ratio", 0.0)),
             semantic_reason=str(raw.get("reason", "")),
         )

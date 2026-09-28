@@ -47,7 +47,7 @@ class VisionEvent:
     event_type: VisionEventType
     confidence: float = 0.0
     bbox: Optional[BoundingBox] = None
-    normalized_offset: float = 0.0
+    normalized_offset: Optional[float] = None
     area_ratio: float = 0.0
     semantic_reason: str = ""
 
