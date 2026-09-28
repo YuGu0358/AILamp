@@ -59,8 +59,9 @@ class AILampToolbox:
         self.led = led_service or LEDSerialService(self.config.led.port, self.config.led.count, self.config.led.baudrate)
         self.motors = motor_service or MotorService(
             self.config.motors.port,
-            self.config.system.project_name.lower(),
+            self.config.motors.lamp_id,
             self.recordings.recordings_dir,
+            fps=self.config.motors.fps,
         )
         self._outputs_connected = False
 

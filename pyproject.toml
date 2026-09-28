@@ -10,6 +10,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = "GPL-3.0-only"
 dependencies = [
+    "mapbox-earcut>=1.0",
     "numpy>=1.26",
 ]
 
@@ -17,7 +18,6 @@ dependencies = [
 hardware = [
     "opencv-python>=4.9",
     "pyserial>=3.5",
-    "sounddevice>=0.5",
     "ultralytics>=8.0",
 ]
 nano = [
@@ -26,9 +26,6 @@ nano = [
     "openai>=2.35.0",
     "pyserial>=3.5",
     "python-dotenv>=1.0",
-    "sounddevice>=0.5",
-    "livekit-agents[openai]>=1.2",
-    "livekit-plugins-noise-cancellation>=0.2",
 ]
 simulation = [
     "mujoco>=3.2",
@@ -37,11 +34,23 @@ simulation = [
 ]
 voice = [
     "python-dotenv>=1.0",
+    "sounddevice>=0.5",
     "livekit-agents[openai]>=1.2",
     "livekit-plugins-noise-cancellation>=0.2",
 ]
 test = [
     "pytest>=8.0",
+    # tests/test_ailamp_adapters.py drives scripts/generate_ailamp_adapters.py, which needs the
+    # mesh stack at import time. trimesh[easy] supplies it: manifold3d (CSG),
+    # mapbox_earcut (triangulation), lxml (3MF), networkx and scipy.
+    # Pinned below 5: tests/test_ailamp_adapters.py compares the checked-in 3MF/STL byte for
+    # byte against a fresh generation, and trimesh 5 writes a different archive container.
+    # The checked-in print files are a deliverable, so the dependency moves, not the parts.
+    "trimesh[easy]>=4.0,<5",
+    # The CSG kernel and the triangulator decide the exact tessellation, so the checked-in
+    # 3MF/STL only regenerate identically under the versions that produced them.
+    "manifold3d==3.5.0",
+    "mapbox-earcut==2.0.0",
 ]
 
 [project.scripts]
@@ -54,7 +63,7 @@ package-dir = {"" = "ailamp_runtime"}
 where = ["ailamp_runtime"]
 
 [tool.setuptools.package-data]
-ailamp = ["recordings/*.csv"]
+ailamp = ["recordings/*.csv", "web/*.html"]
 
 [tool.pytest.ini_options]
 pythonpath = ["ailamp_runtime"]

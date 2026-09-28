@@ -8,3 +8,10 @@ outputs/
 dist/
 build/
 *.egg-info/
+
+# course submission
+outputs/
+.venv/
+*.pyc
+__pycache__/
+.pytest_cache/
